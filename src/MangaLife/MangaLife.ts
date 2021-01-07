@@ -19,7 +19,7 @@ const ML_DOMAIN = 'https://manga4life.com'
 let ML_IMAGE_DOMAIN = 'https://cover.mangabeast01.com/cover'
 
 export const MangaLifeInfo: SourceInfo = {
-  version: '1.1.1',
+  version: '1.1.11',
   name: 'Manga4Life',
   icon: 'icon.png',
   author: 'Daniel Kovalevich',
@@ -328,10 +328,10 @@ export class MangaLife extends Source {
 
     const data = await this.requestManager.schedule(request, 1)
 
-    const hotSection = createHomeSection({ id: 'hot_update', title: 'HOT UPDATES' })
-    const latestSection = createHomeSection({ id: 'latest', title: 'LATEST UPDATES' })
-    const newTitlesSection = createHomeSection({ id: 'new_titles', title: 'NEW TITLES' })
-    const recommendedSection = createHomeSection({ id: 'recommended', title: 'RECOMMENDATIONS' })
+    const hotSection = createHomeSection({ id: 'hot_update', title: 'HOT UPDATES', view_more: true })
+    const latestSection = createHomeSection({ id: 'latest', title: 'LATEST UPDATES', view_more: true })
+    const newTitlesSection = createHomeSection({ id: 'new_titles', title: 'NEW TITLES', view_more: true })
+    const recommendedSection = createHomeSection({ id: 'recommended', title: 'RECOMMENDATIONS', view_more: true })
     sectionCallback(hotSection)
     sectionCallback(latestSection)
     sectionCallback(newTitlesSection)
