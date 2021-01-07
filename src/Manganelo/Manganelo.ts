@@ -19,7 +19,7 @@ import {
 const MN_DOMAIN = 'https://manganelo.com'
 
 export const ManganeloInfo: SourceInfo = {
-  version: '2.0.0',
+  version: '2.0.1',
   name: 'Manganelo',
   icon: 'icon.png',
   author: 'Daniel Kovalevich',
@@ -273,8 +273,8 @@ export class Manganelo extends Source {
 
     // Give Paperback a skeleton of what these home sections should look like to pre-render them
     let section1 = createHomeSection({ id: 'top_week', title: 'TOP OF THE WEEK' })
-    let section2 = createHomeSection({ id: 'latest_updates', title: 'LATEST UPDATES' })
-    let section3 = createHomeSection({ id: 'new_manga', title: 'NEW MANGA' })
+    let section2 = createHomeSection({ id: 'latest_updates', title: 'LATEST UPDATES', view_more: true })
+    let section3 = createHomeSection({ id: 'new_manga', title: 'NEW MANGA', view_more: true })
     sectionCallback(section1)
     sectionCallback(section2)
     sectionCallback(section3)

@@ -19,7 +19,7 @@ const ML_DOMAIN = 'https://manga4life.com'
 let ML_IMAGE_DOMAIN = 'https://cover.mangabeast01.com/cover'
 
 export const MangaLifeInfo: SourceInfo = {
-  version: '1.1.11',
+  version: '1.1.2',
   name: 'Manga4Life',
   icon: 'icon.png',
   author: 'Daniel Kovalevich',
