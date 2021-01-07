@@ -411,8 +411,8 @@ class MangaDex extends paperback_extensions_common_1.Source {
     searchRequest(query, metadata) {
         var _a, _b;
         return __awaiter(this, void 0, void 0, function* () {
-            const page = (_a = metadata.page) !== null && _a !== void 0 ? _a : 1;
-            const items = (_b = metadata.items) !== null && _b !== void 0 ? _b : 50;
+            const page = (_a = metadata === null || metadata === void 0 ? void 0 : metadata.page) !== null && _a !== void 0 ? _a : 1;
+            const items = (_b = metadata === null || metadata === void 0 ? void 0 : metadata.items) !== null && _b !== void 0 ? _b : 50;
             const request = this.constructSearchRequest(query, page, items);
             const response = yield this.requestManager.schedule(request, 1);
             const json = JSON.parse(response.data);
