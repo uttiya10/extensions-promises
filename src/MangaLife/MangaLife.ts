@@ -19,7 +19,7 @@ const ML_DOMAIN = 'https://manga4life.com'
 let ML_IMAGE_DOMAIN = 'https://cover.mangabeast01.com/cover'
 
 export const MangaLifeInfo: SourceInfo = {
-  version: '1.1.3',
+  version: '1.1.4',
   name: 'Manga4Life',
   icon: 'icon.png',
   author: 'Daniel Kovalevich',
@@ -425,8 +425,8 @@ export class MangaLife extends Source {
     })
 
     const data = await this.requestManager.schedule(request, 1)
-    let manga: MangaTile[] = []
-    let collectedIds: string[] = []
+    //let manga: MangaTile[] = []
+    let manga: Set<MangaTile> = new Set<MangaTile>()
     if (homepageSectionId == 'hot_update') {
       let hot = JSON.parse((data.data.match(/vm.HotUpdateJSON = (.*);/) ?? [])[1]).slice(15)
       hot.forEach((elem: any) => {
@@ -437,16 +437,12 @@ export class MangaLife extends Source {
         time = time.slice(0, time.length - 5)
         time = time.slice(4, time.length)
 
-        // Do not allow duplicates
-        if(!collectedIds.includes(id)) {
-          manga.push(createMangaTile({
-            id: id,
-            image: image,
-            title: createIconText({ text: title }),
-            secondaryText: createIconText({ text: time, icon: 'clock.fill' })
-          }))
-          collectedIds.push(id)
-        }
+        manga.add(createMangaTile({
+          id: id,
+          image: image,
+          title: createIconText({ text: title }),
+          secondaryText: createIconText({ text: time, icon: 'clock.fill' })
+        }))
       })
     }
     else if (homepageSectionId == 'latest') {
@@ -459,16 +455,12 @@ export class MangaLife extends Source {
         time = time.slice(0, time.length - 5)
         time = time.slice(4, time.length)
 
-        // Do not allow duplicates
-        if(!collectedIds.includes(id)) {
-          manga.push(createMangaTile({
-            id: id,
-            image: image,
-            title: createIconText({ text: title }),
-            secondaryText: createIconText({ text: time, icon: 'clock.fill' })
-          }))
-          collectedIds.push(id)
-        }
+        manga.add(createMangaTile({
+          id: id,
+          image: image,
+          title: createIconText({ text: title }),
+          secondaryText: createIconText({ text: time, icon: 'clock.fill' })
+        }))
       })
     }
     else if (homepageSectionId == 'recommended') {
@@ -481,16 +473,12 @@ export class MangaLife extends Source {
         time = time.slice(0, time.length - 5)
         time = time.slice(4, time.length)
 
-        // Do not allow duplicates
-        if(!collectedIds.includes(id)) {
-          manga.push(createMangaTile({
-            id: id,
-            image: image,
-            title: createIconText({ text: title }),
-            secondaryText: createIconText({ text: time, icon: 'clock.fill' })
-          }))
-          collectedIds.push(id)
-        }
+        manga.add(createMangaTile({
+          id: id,
+          image: image,
+          title: createIconText({ text: title }),
+          secondaryText: createIconText({ text: time, icon: 'clock.fill' })
+        }))
       })
     }
     else if (homepageSectionId == 'new_titles') {
@@ -503,7 +491,7 @@ export class MangaLife extends Source {
         time = time.slice(0, time.length - 5)
         time = time.slice(4, time.length)
 
-        manga.push(createMangaTile({
+        manga.add(createMangaTile({
           id: id,
           image: image,
           title: createIconText({ text: title })
@@ -514,7 +502,7 @@ export class MangaLife extends Source {
 
     // This source parses JSON and never requires additional pages
     return createPagedResults({
-      results: manga
+      results: Array.from(manga)
     })
   }
 }
