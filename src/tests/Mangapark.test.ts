@@ -2,7 +2,7 @@ import cheerio from 'cheerio'
 import { APIWrapper, Source } from 'paperback-extensions-common';
 import { MangaPark } from '../MangaPark/MangaPark';
 
-describe('Manganelo Tests', function () {
+describe('MangaPark Tests', function () {
 
     var wrapper: APIWrapper = new APIWrapper();
     var source: Source = new MangaPark(cheerio);
