@@ -307,7 +307,7 @@ const paperback_extensions_common_1 = require("paperback-extensions-common");
 const ML_DOMAIN = 'https://manga4life.com';
 let ML_IMAGE_DOMAIN = 'https://cover.mangabeast01.com/cover';
 exports.MangaLifeInfo = {
-    version: '1.1.2',
+    version: '1.1.3',
     name: 'Manga4Life',
     icon: 'icon.png',
     author: 'Daniel Kovalevich',
@@ -634,6 +634,8 @@ class MangaLife extends paperback_extensions_common_1.Source {
                     secondaryText: createIconText({ text: time, icon: 'clock.fill' })
                 }));
             });
+            hotSection.items = hotManga;
+            sectionCallback(hotSection);
             let latestManga = [];
             latest.forEach((elem) => {
                 let id = elem.IndexName;
@@ -649,6 +651,8 @@ class MangaLife extends paperback_extensions_common_1.Source {
                     secondaryText: createIconText({ text: time, icon: 'clock.fill' })
                 }));
             });
+            latestSection.items = latestManga;
+            sectionCallback(latestSection);
             let newManga = [];
             newTitles.forEach((elem) => {
                 let id = elem.IndexName;
@@ -660,6 +664,8 @@ class MangaLife extends paperback_extensions_common_1.Source {
                     title: createIconText({ text: title })
                 }));
             });
+            newTitlesSection.items = newManga;
+            sectionCallback(newTitlesSection);
             let recManga = [];
             recommended.forEach((elem) => {
                 let id = elem.IndexName;
@@ -672,13 +678,7 @@ class MangaLife extends paperback_extensions_common_1.Source {
                     title: createIconText({ text: title })
                 }));
             });
-            hotSection.items = hotManga;
-            latestSection.items = latestManga;
-            newTitlesSection.items = newManga;
             recommendedSection.items = recManga;
-            sectionCallback(hotSection);
-            sectionCallback(latestSection);
-            sectionCallback(newTitlesSection);
             sectionCallback(recommendedSection);
         });
     }
@@ -691,8 +691,9 @@ class MangaLife extends paperback_extensions_common_1.Source {
             });
             const data = yield this.requestManager.schedule(request, 1);
             let manga = [];
+            let collectedIds = [];
             if (homepageSectionId == 'hot_update') {
-                let hot = JSON.parse(((_a = data.data.match(/vm.HotUpdateJSON = (.*);/)) !== null && _a !== void 0 ? _a : [])[1]);
+                let hot = JSON.parse(((_a = data.data.match(/vm.HotUpdateJSON = (.*);/)) !== null && _a !== void 0 ? _a : [])[1]).slice(15);
                 hot.forEach((elem) => {
                     let id = elem.IndexName;
                     let title = elem.SeriesName;
@@ -700,16 +701,20 @@ class MangaLife extends paperback_extensions_common_1.Source {
                     let time = (new Date(elem.Date)).toDateString();
                     time = time.slice(0, time.length - 5);
                     time = time.slice(4, time.length);
-                    manga.push(createMangaTile({
-                        id: id,
-                        image: image,
-                        title: createIconText({ text: title }),
-                        secondaryText: createIconText({ text: time, icon: 'clock.fill' })
-                    }));
+                    // Do not allow duplicates
+                    if (!collectedIds.includes(id)) {
+                        manga.push(createMangaTile({
+                            id: id,
+                            image: image,
+                            title: createIconText({ text: title }),
+                            secondaryText: createIconText({ text: time, icon: 'clock.fill' })
+                        }));
+                        collectedIds.push(id);
+                    }
                 });
             }
             else if (homepageSectionId == 'latest') {
-                let latest = JSON.parse(((_b = data.data.match(/vm.LatestJSON = (.*);/)) !== null && _b !== void 0 ? _b : [])[1]);
+                let latest = JSON.parse(((_b = data.data.match(/vm.LatestJSON = (.*);/)) !== null && _b !== void 0 ? _b : [])[1]).slice(15);
                 latest.forEach((elem) => {
                     let id = elem.IndexName;
                     let title = elem.SeriesName;
@@ -717,12 +722,16 @@ class MangaLife extends paperback_extensions_common_1.Source {
                     let time = (new Date(elem.Date)).toDateString();
                     time = time.slice(0, time.length - 5);
                     time = time.slice(4, time.length);
-                    manga.push(createMangaTile({
-                        id: id,
-                        image: image,
-                        title: createIconText({ text: title }),
-                        secondaryText: createIconText({ text: time, icon: 'clock.fill' })
-                    }));
+                    // Do not allow duplicates
+                    if (!collectedIds.includes(id)) {
+                        manga.push(createMangaTile({
+                            id: id,
+                            image: image,
+                            title: createIconText({ text: title }),
+                            secondaryText: createIconText({ text: time, icon: 'clock.fill' })
+                        }));
+                        collectedIds.push(id);
+                    }
                 });
             }
             else if (homepageSectionId == 'recommended') {
@@ -734,16 +743,20 @@ class MangaLife extends paperback_extensions_common_1.Source {
                     let time = (new Date(elem.Date)).toDateString();
                     time = time.slice(0, time.length - 5);
                     time = time.slice(4, time.length);
-                    manga.push(createMangaTile({
-                        id: id,
-                        image: image,
-                        title: createIconText({ text: title }),
-                        secondaryText: createIconText({ text: time, icon: 'clock.fill' })
-                    }));
+                    // Do not allow duplicates
+                    if (!collectedIds.includes(id)) {
+                        manga.push(createMangaTile({
+                            id: id,
+                            image: image,
+                            title: createIconText({ text: title }),
+                            secondaryText: createIconText({ text: time, icon: 'clock.fill' })
+                        }));
+                        collectedIds.push(id);
+                    }
                 });
             }
             else if (homepageSectionId == 'new_titles') {
-                let newTitles = JSON.parse(((_d = data.data.match(/vm.NewSeriesJSON = (.*);/)) !== null && _d !== void 0 ? _d : [])[1]);
+                let newTitles = JSON.parse(((_d = data.data.match(/vm.NewSeriesJSON = (.*);/)) !== null && _d !== void 0 ? _d : [])[1]).slice(15);
                 newTitles.forEach((elem) => {
                     let id = elem.IndexName;
                     let title = elem.SeriesName;
