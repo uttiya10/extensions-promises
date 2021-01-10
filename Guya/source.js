@@ -310,7 +310,7 @@ const GUYA_ALL_SERIES_API = `${GUYA_API_BASE}/api/get_all_series/`;
 const GUYA_LANG = "en";
 const SPLIT_VAR = "|";
 exports.GuyaInfo = {
-    version: "1.1.0",
+    version: "1.1.1",
     name: "Guya",
     icon: "icon.png",
     author: "funkyhippo",
@@ -431,7 +431,7 @@ class Guya extends paperback_extensions_common_1.Source {
                 method: "GET"
             });
             const data = yield this.requestManager.schedule(request, 1);
-            let result = typeof data === "string" ? JSON.parse(data) : data;
+            let result = typeof data.data === "string" ? JSON.parse(data.data) : data.data;
             let mangas = [];
             for (let series in result) {
                 let seriesDetails = result[series];
