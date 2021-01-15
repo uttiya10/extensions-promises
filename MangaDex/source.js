@@ -329,7 +329,7 @@ exports.MangaDexInfo = {
     description: 'Overwrites SafeDex,unlocks all mangas MangaDex has to offer and loads slightly faster. supports notifications',
     icon: 'icon.png',
     name: 'MangaDex Unlocked',
-    version: '2.0.2',
+    version: '2.0.3',
     authorWebsite: 'https://github.com/Pogogo007/extensions-main-promises',
     websiteBaseURL: MANGADEX_DOMAIN,
     hentaiSource: false,
@@ -384,6 +384,7 @@ class MangaDex extends paperback_extensions_common_1.Source {
                     },
                     data: JSON.stringify({
                         id: batchedIds.map(x => parseInt(x)),
+                        bypassFilter: true,
                     }),
                 });
                 // eslint-disable-next-line no-await-in-loop
