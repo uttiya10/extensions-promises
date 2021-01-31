@@ -18,7 +18,7 @@ const headers = { "content-type": "application/x-www-form-urlencoded" }
 const method = 'GET'
 
 export const MangaLifeInfo: SourceInfo = {
-  version: '1.5.0',
+  version: '2.0.0',
   name: 'Manga4Life',
   icon: 'icon.png',
   author: 'Daniel Kovalevich',
@@ -44,8 +44,8 @@ export class MangaLife extends Source {
       param: mangaId
     })
 
-    const data = await this.requestManager.schedule(request, 1)
-    let $ = this.cheerio.load(data.data)
+    const response = await this.requestManager.schedule(request, 1)
+    let $ = this.cheerio.load(response.data)
     return parseMangaDetails($, mangaId)
   }
 
@@ -57,8 +57,8 @@ export class MangaLife extends Source {
       param: mangaId
     })
 
-    const data = await this.requestManager.schedule(request, 1)
-    const $ = this.cheerio.load(data.data)
+    const response = await this.requestManager.schedule(request, 1)
+    const $ = this.cheerio.load(response.data)
     return parseChapters($, mangaId)
   }
 
@@ -70,8 +70,8 @@ export class MangaLife extends Source {
       param: chapterId
     })
 
-    const data = await this.requestManager.schedule(request, 1)
-    return parseChapterDetails(data, mangaId, chapterId);
+    const response = await this.requestManager.schedule(request, 1)
+    return parseChapterDetails(response, mangaId, chapterId);
   }
 
   async filterUpdatedManga(mangaUpdatesFoundCallback: (updates: MangaUpdates) => void, time: Date, ids: string[]): Promise<void> {
@@ -81,8 +81,8 @@ export class MangaLife extends Source {
       method,
     })
 
-    const data = await this.requestManager.schedule(request, 1)
-    const returnObject = parseUpdatedManga(data, time, ids);
+    const response = await this.requestManager.schedule(request, 1)
+    const returnObject = parseUpdatedManga(response, time, ids);
     mangaUpdatesFoundCallback(createMangaUpdates(returnObject))
   }
 
@@ -95,9 +95,9 @@ export class MangaLife extends Source {
       method,
     })
 
-    const data = await this.requestManager.schedule(request, 1)
-    const $ = this.cheerio.load(data.data)
-    return parseSearch($, data, metadata);
+    const response = await this.requestManager.schedule(request, 1)
+    const $ = this.cheerio.load(response.data)
+    return parseSearch($, response, metadata);
   }
 
   async getTags(): Promise<TagSection[] | null> {
@@ -107,8 +107,8 @@ export class MangaLife extends Source {
       headers,
     })
 
-    const data = await this.requestManager.schedule(request, 1)
-    return parseTags(data);
+    const response = await this.requestManager.schedule(request, 1)
+    return parseTags(response);
   }
 
   async getHomePageSections(sectionCallback: (section: HomeSection) => void): Promise<void> {
@@ -117,18 +117,18 @@ export class MangaLife extends Source {
       method,
     })
 
-    const data = await this.requestManager.schedule(request, 1)
-    const $ = this.cheerio.load(data.data)
-    parseHomeSections($, data, sectionCallback);
+    const response = await this.requestManager.schedule(request, 1)
+    const $ = this.cheerio.load(response.data)
+    parseHomeSections($, response, sectionCallback);
   }
 
-  async getViewMoreItems(homepageSectionId: string, metadata: any): Promise<PagedResults | null> {
+  async getViewMoreItems(homepageSectionId: string, _metadata: any): Promise<PagedResults | null> {
     const request = createRequestObject({
       url: ML_DOMAIN,
       method,
     })
 
-    const data = await this.requestManager.schedule(request, 1)
-    return parseViewMore(data, homepageSectionId);
+    const response = await this.requestManager.schedule(request, 1)
+    return parseViewMore(response, homepageSectionId);
   }
 }

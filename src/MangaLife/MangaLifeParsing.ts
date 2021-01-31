@@ -232,8 +232,6 @@ export const parseTags = ({ data }: any): TagSection[] => {
     return tagSections
 }
 
-
-
 export const parseHomeSections = ($: CheerioStatic, { data }: any, sectionCallback: (section: HomeSection) => void): void => {
     const hotSection = createHomeSection({ id: 'hot_update', title: 'HOT UPDATES', view_more: true })
     const latestSection = createHomeSection({ id: 'latest', title: 'LATEST UPDATES', view_more: true })
@@ -301,6 +299,6 @@ export const parseViewMore = ({ data }: any, homepageSectionId: string): PagedRe
 
     // This source parses JSON and never requires additional pages
     return createPagedResults({
-      results: Array.from(manga)
+      results: manga
     })
 }
