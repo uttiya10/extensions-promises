@@ -315,7 +315,7 @@ exports.ML_DOMAIN = 'https://manga4life.com';
 const headers = { "content-type": "application/x-www-form-urlencoded" };
 const method = 'GET';
 exports.MangaLifeInfo = {
-    version: '1.5.0',
+    version: '2.0.0',
     name: 'Manga4Life',
     icon: 'icon.png',
     author: 'Daniel Kovalevich',
@@ -339,8 +339,8 @@ class MangaLife extends paperback_extensions_common_1.Source {
                 method,
                 param: mangaId
             });
-            const data = yield this.requestManager.schedule(request, 1);
-            let $ = this.cheerio.load(data.data);
+            const response = yield this.requestManager.schedule(request, 1);
+            let $ = this.cheerio.load(response.data);
             return MangaLifeParsing_1.parseMangaDetails($, mangaId);
         });
     }
@@ -352,8 +352,8 @@ class MangaLife extends paperback_extensions_common_1.Source {
                 headers,
                 param: mangaId
             });
-            const data = yield this.requestManager.schedule(request, 1);
-            const $ = this.cheerio.load(data.data);
+            const response = yield this.requestManager.schedule(request, 1);
+            const $ = this.cheerio.load(response.data);
             return MangaLifeParsing_1.parseChapters($, mangaId);
         });
     }
@@ -365,8 +365,8 @@ class MangaLife extends paperback_extensions_common_1.Source {
                 method,
                 param: chapterId
             });
-            const data = yield this.requestManager.schedule(request, 1);
-            return MangaLifeParsing_1.parseChapterDetails(data, mangaId, chapterId);
+            const response = yield this.requestManager.schedule(request, 1);
+            return MangaLifeParsing_1.parseChapterDetails(response, mangaId, chapterId);
         });
     }
     filterUpdatedManga(mangaUpdatesFoundCallback, time, ids) {
@@ -376,8 +376,8 @@ class MangaLife extends paperback_extensions_common_1.Source {
                 headers,
                 method,
             });
-            const data = yield this.requestManager.schedule(request, 1);
-            const returnObject = MangaLifeParsing_1.parseUpdatedManga(data, time, ids);
+            const response = yield this.requestManager.schedule(request, 1);
+            const returnObject = MangaLifeParsing_1.parseUpdatedManga(response, time, ids);
             mangaUpdatesFoundCallback(createMangaUpdates(returnObject));
         });
     }
@@ -390,9 +390,9 @@ class MangaLife extends paperback_extensions_common_1.Source {
                 headers,
                 method,
             });
-            const data = yield this.requestManager.schedule(request, 1);
-            const $ = this.cheerio.load(data.data);
-            return MangaLifeParsing_1.parseSearch($, data, metadata);
+            const response = yield this.requestManager.schedule(request, 1);
+            const $ = this.cheerio.load(response.data);
+            return MangaLifeParsing_1.parseSearch($, response, metadata);
         });
     }
     getTags() {
@@ -402,8 +402,8 @@ class MangaLife extends paperback_extensions_common_1.Source {
                 method,
                 headers,
             });
-            const data = yield this.requestManager.schedule(request, 1);
-            return MangaLifeParsing_1.parseTags(data);
+            const response = yield this.requestManager.schedule(request, 1);
+            return MangaLifeParsing_1.parseTags(response);
         });
     }
     getHomePageSections(sectionCallback) {
@@ -412,19 +412,19 @@ class MangaLife extends paperback_extensions_common_1.Source {
                 url: `${exports.ML_DOMAIN}`,
                 method,
             });
-            const data = yield this.requestManager.schedule(request, 1);
-            const $ = this.cheerio.load(data.data);
-            MangaLifeParsing_1.parseHomeSections($, data, sectionCallback);
+            const response = yield this.requestManager.schedule(request, 1);
+            const $ = this.cheerio.load(response.data);
+            MangaLifeParsing_1.parseHomeSections($, response, sectionCallback);
         });
     }
-    getViewMoreItems(homepageSectionId, metadata) {
+    getViewMoreItems(homepageSectionId, _metadata) {
         return __awaiter(this, void 0, void 0, function* () {
             const request = createRequestObject({
                 url: exports.ML_DOMAIN,
                 method,
             });
-            const data = yield this.requestManager.schedule(request, 1);
-            return MangaLifeParsing_1.parseViewMore(data, homepageSectionId);
+            const response = yield this.requestManager.schedule(request, 1);
+            return MangaLifeParsing_1.parseViewMore(response, homepageSectionId);
         });
     }
 }
@@ -710,7 +710,7 @@ exports.parseViewMore = ({ data }, homepageSectionId) => {
     }
     // This source parses JSON and never requires additional pages
     return createPagedResults({
-        results: Array.from(manga)
+        results: manga
     });
 };
 
