@@ -16,41 +16,41 @@ export const regex: RegexIdMatch = {
 }
 
 export const parseMangaDetails = ($: CheerioStatic, mangaId: string): Manga => {
-    let json = $('[type=application\\/ld\\+json]').html()?.replace(/\t*\n*/g, '') ?? ''
+    const json = $('[type=application\\/ld\\+json]').html()?.replace(/\t*\n*/g, '') ?? ''
 
     // this is only because they added some really jank alternate titles and didn't propely string escape
-    let jsonWithoutAlternateName = json.replace(/"alternateName".*?],/g, '')
-    let alternateNames = /"alternateName": \[(.*?)\]/.exec(json)?.[1]
-        .replace(/\"/g, '')
-        .split(',')
-    let parsedJson = JSON.parse(jsonWithoutAlternateName)
-    let entity = parsedJson.mainEntity
-    let info = $('.row')
-    let imgSource = $('.ImgHolder').html()?.match(/src="(.*)\//)?.[1] ?? ML_IMAGE_DOMAIN
+    const jsonWithoutAlternateName = json.replace(/"alternateName".*?],/g, '')
+    const alternateNames = /"alternateName": \[(.*?)\]/.exec(json)?.[1]
+      .replace(/\"/g, '')
+      .split(',')
+    const parsedJson = JSON.parse(jsonWithoutAlternateName)
+    const entity = parsedJson.mainEntity
+    const info = $('.row')
+    const imgSource = $('.ImgHolder').html()?.match(/src="(.*)\//)?.[1] ?? ML_IMAGE_DOMAIN
     if (imgSource !== ML_IMAGE_DOMAIN)
-        ML_IMAGE_DOMAIN = imgSource
-    let image = `${ML_IMAGE_DOMAIN}/${mangaId}.jpg`
-    let title = $('h1', info).first().text() ?? ''
+      ML_IMAGE_DOMAIN = imgSource
+    const image = `${ML_IMAGE_DOMAIN}/${mangaId}.jpg`
+    const title = $('h1', info).first().text() ?? ''
     let titles = [title]
-    let author = entity.author[0]
+    const author = entity.author[0]
     titles = titles.concat(alternateNames ?? '')
-    let follows = Number($.root().html()?.match(/vm.NumSubs = (.*);/)?.[1])
+    const follows = Number($.root().html()?.match(/vm.NumSubs = (.*);/)?.[1])
 
-    let tagSections: TagSection[] = [createTagSection({ id: '0', label: 'genres', tags: [] }),
+    const tagSections: TagSection[] = [createTagSection({ id: '0', label: 'genres', tags: [] }),
     createTagSection({ id: '1', label: 'format', tags: [] })]
     tagSections[0].tags = entity.genre.map((elem: string) => createTag({ id: elem, label: elem }))
-    let update = entity.dateModified
+    const lastUpdate = entity.dateModified
 
     let status = MangaStatus.ONGOING
-    let summary = ''
-    let hentai = entity.genre.includes('Hentai') || entity.genre.includes('Adult')
+    let desc = ''
+    const hentai = entity.genre.includes('Hentai') || entity.genre.includes('Adult')
 
-    let details = $('.list-group', info)
-    for (let row of $('li', details).toArray()) {
-        let text = $('.mlabel', row).text()
+    const details = $('.list-group', info)
+    for (const row of $('li', details).toArray()) {
+        const text = $('.mlabel', row).text()
         switch (text) {
             case 'Type:': {
-                let type = $('a', row).text()
+                const type = $('a', row).text()
                 tagSections[1].tags.push(createTag({ id: type.trim(), label: type.trim() }))
                 break
             }
@@ -59,7 +59,7 @@ export const parseMangaDetails = ($: CheerioStatic, mangaId: string): Manga => {
                 break
             }
             case 'Description:': {
-                summary = $('div', row).text().trim()
+                desc = $('div', row).text().trim()
                 break
             }
         }
@@ -67,74 +67,72 @@ export const parseMangaDetails = ($: CheerioStatic, mangaId: string): Manga => {
 
     return createManga({
         id: mangaId,
-        titles: titles,
-        image: image,
+        titles,
+        image,
         rating: 0,
-        status: status,
-        author: author,
+        status,
+        author,
         tags: tagSections,
-        desc: summary,
-        hentai: hentai,
-        follows: follows,
-        lastUpdate: update
+        desc,
+        hentai,
+        follows,
+        lastUpdate
     })
 }
 
 export const parseChapters = ($: CheerioStatic, mangaId: string): Chapter[] => {
-    let chapterJS: any[] = JSON.parse($.root().html()?.match(regex['chapters'])?.[1] ?? '').reverse()
-    let chapters: Chapter[] = []
+    const chapterJS: any[] = JSON.parse($.root().html()?.match(regex['chapters'])?.[1] ?? '').reverse()
+    const chapters: Chapter[] = []
     // following the url encoding that the website uses, same variables too
-    chapterJS.forEach((elem: any) => {
-        let chapterCode: string = elem.Chapter
-        let vol = Number(chapterCode.substring(0, 1))
-        let index = vol != 1 ? '-index-' + vol : ''
-        let n = parseInt(chapterCode.slice(1, -1))
-        let a = Number(chapterCode[chapterCode.length - 1])
-        let m = a != 0 ? '.' + a : ''
-        let id = mangaId + '-chapter-' + n + m + index + '.html'
-        let chNum = n + a * .1
-        let name = elem.ChapterName ? elem.ChapterName : '' // can be null
+    for (const elem of chapterJS) {
+      const chapterCode: string = elem.Chapter
+      const volume = Number(chapterCode.substring(0, 1))
+      const index = volume != 1 ? '-index-' + volume : ''
+      const n = parseInt(chapterCode.slice(1, -1))
+      const a = Number(chapterCode[chapterCode.length - 1])
+      const m = a != 0 ? '.' + a : ''
+      const id = mangaId + '-chapter-' + n + m + index + '.html'
+      const chapNum = n + a * .1
+      const name = elem.ChapterName ? elem.ChapterName : '' // can be null
 
-        let timeStr = elem.Date.replace(/-/g, "/")
-        let time = new Date(timeStr)
+      const timeStr = elem.Date.replace(/-/g, "/")
+      const time = new Date(timeStr)
 
-        chapters.push(createChapter({
-            id: id,
-            mangaId: mangaId,
-            name: name,
-            chapNum: chNum,
-            volume: vol,
-            langCode: LanguageCode.ENGLISH,
-            time: time
-        }))
-    })
+      chapters.push(createChapter({
+        id,
+        mangaId,
+        name,
+        chapNum,
+        volume,
+        langCode: LanguageCode.ENGLISH,
+        time
+      }))
+    }
 
     return chapters;
 }
 
-export const parseChapterDetails = ({ data }: any, mangaId: string, chapterId: string): ChapterDetails => {
-    let pages: string[] = []
-    let pathName = JSON.parse(data.match(/vm.CurPathName = (.*);/)?.[1])
-    let chapterInfo = JSON.parse(data.match(/vm.CurChapter = (.*);/)?.[1])
-    let pageNum = Number(chapterInfo.Page)
+export const parseChapterDetails = (data: any, mangaId: string, chapterId: string): ChapterDetails => {
+    const pages: string[] = []
+    const pathName = JSON.parse(data.match(/vm.CurPathName = (.*);/)?.[1])
+    const chapterInfo = JSON.parse(data.match(/vm.CurChapter = (.*);/)?.[1])
+    const pageNum = Number(chapterInfo.Page)
 
-    let chapter = chapterInfo.Chapter.slice(1, -1)
-    let odd = chapterInfo.Chapter[chapterInfo.Chapter.length - 1]
-    let chapterImage = odd == 0 ? chapter : chapter + '.' + odd
+    const chapter = chapterInfo.Chapter.slice(1, -1)
+    const odd = chapterInfo.Chapter[chapterInfo.Chapter.length - 1]
+    const chapterImage = odd == 0 ? chapter : chapter + '.' + odd
 
     for (let i = 0; i < pageNum; i++) {
-        let s = '000' + (i + 1)
-        let page = s.substr(s.length - 3)
-        pages.push(`https://${pathName}/manga/${mangaId}/${chapterInfo.Directory == '' ? '' : chapterInfo.Directory + '/'}${chapterImage}-${page}.png`)
+      const s = '000' + (i + 1)
+      const page = s.substr(s.length - 3)
+      pages.push(`https://${pathName}/manga/${mangaId}/${chapterInfo.Directory == '' ? '' : chapterInfo.Directory + '/'}${chapterImage}-${page}.png`)
     }
 
-    let chapterDetails = createChapterDetails({
-        id: chapterId,
-        mangaId: mangaId,
-        pages, longStrip: false
+    return createChapterDetails({
+      id: chapterId,
+      mangaId: mangaId,
+      pages, longStrip: false
     })
-
-    return chapterDetails
 }
 
 export const parseUpdatedManga = ({ data }: any, time: Date, ids: string[]): MangaUpdates => {
@@ -156,10 +154,10 @@ export const searchMetadata = (query: SearchRequest) => {
         default: status = ''
     }
 
-    let genre: string[] | undefined = query.includeGenre ?
+    const genre: string[] | undefined = query.includeGenre ?
         (query.includeDemographic ? query.includeGenre.concat(query.includeDemographic) : query.includeGenre) :
         query.includeDemographic
-    let genreNo: string[] | undefined = query.excludeGenre ?
+    const genreNo: string[] | undefined = query.excludeGenre ?
         (query.excludeDemographic ? query.excludeGenre.concat(query.excludeDemographic) : query.excludeGenre) :
         query.excludeDemographic
 
@@ -173,16 +171,13 @@ export const searchMetadata = (query: SearchRequest) => {
     }
 }
 
-export const parseSearch = ({ data }: any, metadata: any): PagedResults => {
-    let mangaTiles: MangaTile[] = []
-    // let script = $('script:not([src])').filter((i, e) => $(e).html()?.includes('vm.Directory') ?? false)
-    let directory: any[] = JSON.parse(data?.match(regex['directory'])?.[1] ?? '')['Directory']
+export const parseSearch = (data: any, metadata: any): PagedResults => {
+    const mangaTiles: MangaTile[] = []
+    const directory: any[] = JSON.parse(data?.match(regex['directory'])?.[1] ?? '')['Directory']
+    const imgSource = data?.match(regex['directory_image_host'])?.[1] ?? ML_IMAGE_DOMAIN
+    if (imgSource !== ML_IMAGE_DOMAIN) ML_IMAGE_DOMAIN = imgSource
 
-    let imgSource = data?.match(regex['directory_image_host'])?.[1] ?? '' ?? ML_IMAGE_DOMAIN
-    if (imgSource !== ML_IMAGE_DOMAIN)
-        ML_IMAGE_DOMAIN = imgSource
-
-    directory.forEach((elem) => {
+    for (const elem of directory) {
         let mKeyword: boolean = typeof metadata.keyword !== 'undefined' ? false : true
         let mAuthor: boolean = metadata.author !== '' ? false : true
         let mStatus: boolean = metadata.status !== '' ? false : true
@@ -190,12 +185,12 @@ export const parseSearch = ({ data }: any, metadata: any): PagedResults => {
         let mGenre: boolean = typeof metadata.genre !== 'undefined' && metadata.genre.length > 0 ? false : true
         let mGenreNo: boolean = typeof metadata.genreNo !== 'undefined' ? true : false
         if (!mKeyword) {
-            let allWords: string = [...(elem.al ?? []), elem.s ?? ''].join('||').toLowerCase()
+            const allWords: string = [...(elem.al ?? []), elem.s ?? ''].join('||').toLowerCase()
             mKeyword = allWords.includes(metadata.keyword)
         }
 
         if (!mAuthor) {
-            let authors: string = elem.a?.join('||').toLowerCase() ?? ''
+            const authors: string = elem.a?.join('||').toLowerCase() ?? ''
             if (authors.includes(metadata.author)) mAuthor = true
         }
 
@@ -203,8 +198,7 @@ export const parseSearch = ({ data }: any, metadata: any): PagedResults => {
             if ((elem.st == 'ongoing' && metadata.status == 'ongoing') || (elem.st != 'ongoing' && metadata.ss != 'ongoing')) mStatus = true
         }
 
-        let flatG = elem.g?.join('||') ?? ''
-
+        const flatG = elem.g?.join('||') ?? ''
         if (!mType) mType = metadata.type.includes(elem.t)
         if (!mGenre) mGenre = metadata.genre.every((i: string) => flatG.includes(i))
         if (mGenreNo) mGenreNo = metadata.genreNo.every((i: string) => flatG.includes(i))
@@ -217,7 +211,7 @@ export const parseSearch = ({ data }: any, metadata: any): PagedResults => {
                 subtitleText: createIconText({ text: elem.st })
             }))
         }
-    })
+    }
 
     // This source parses JSON and never requires additional pages
     return createPagedResults({
@@ -225,18 +219,18 @@ export const parseSearch = ({ data }: any, metadata: any): PagedResults => {
     })
 }
 
-export const parseTags = ({ data }: any): TagSection[] => {
-    let tagSections: TagSection[] = [createTagSection({ id: '0', label: 'genres', tags: [] }),
-    createTagSection({ id: '1', label: 'format', tags: [] })]
-    let genres = JSON.parse(data.match(/"Genre"\s*: (.*)/)?.[1].replace(/'/g, "\""))
-    let typesHTML = data.match(/"Type"\s*: (.*),/g)?.[1]
-    let types = JSON.parse(typesHTML.match(/(\[.*\])/)?.[1].replace(/'/g, "\""))
+export const parseTags = (data: any): TagSection[] => {
+    const tagSections: TagSection[] = [createTagSection({ id: '0', label: 'genres', tags: [] }),
+        createTagSection({ id: '1', label: 'format', tags: [] })]
+    const genres = JSON.parse(data.match(/"Genre"\s*: (.*)/)?.[1].replace(/'/g, "\""))
+    const typesHTML = data.match(/"Type"\s*: (.*),/g)?.[1]
+    const types = JSON.parse(typesHTML.match(/(\[.*\])/)?.[1].replace(/'/g, "\""))
     tagSections[0].tags = genres.map((e: any) => createTag({ id: e, label: e }))
     tagSections[1].tags = types.map((e: any) => createTag({ id: e, label: e }))
     return tagSections
 }
 
-export const parseHomeSections = ($: CheerioStatic, { data }: any, sectionCallback: (section: HomeSection) => void): void => {
+export const parseHomeSections = ($: CheerioStatic, data: any, sectionCallback: (section: HomeSection) => void): void => {
     const hotSection = createHomeSection({ id: 'hot_update', title: 'HOT UPDATES', view_more: true })
     const latestSection = createHomeSection({ id: 'latest', title: 'LATEST UPDATES', view_more: true })
     const newTitlesSection = createHomeSection({ id: 'new_titles', title: 'NEW TITLES', view_more: true })
@@ -276,7 +270,7 @@ export const parseHomeSections = ($: CheerioStatic, { data }: any, sectionCallba
     }
 }
 
-export const parseViewMore = ({ data }: any, homepageSectionId: string): PagedResults | null => {
+export const parseViewMore = (data: any, homepageSectionId: string): PagedResults | null => {
     const manga: MangaTile[] = []
     const mangaIds: Set<string> = new Set<string>()
 
