@@ -6,12 +6,13 @@ export type RegexIdMatch = {
     [id: string]: RegExp
 }
 export const regex: RegexIdMatch = {
-    'hot_update': /vm.HotUpdateJSON = (.*);/, 
-    'latest': /vm.LatestJSON = (.*);/, 
-    'recommended': /vm.RecommendationJSON = (.*);/, 
+    'hot_update': /vm.HotUpdateJSON = (.*);/,
+    'latest': /vm.LatestJSON = (.*);/,
+    'recommended': /vm.RecommendationJSON = (.*);/,
     'new_titles': /vm.NewSeriesJSON = (.*);/,
     'chapters': /vm.Chapters = (.*);/,
-    'directory': /vm.Directory = (.*);/,
+    'directory': /vm.FullDirectory = (.*);/,
+    'directory_image_host': /<img ng-src=\"(.*)\//
 }
 
 export const parseMangaDetails = ($: CheerioStatic, mangaId: string): Manga => {
@@ -20,14 +21,14 @@ export const parseMangaDetails = ($: CheerioStatic, mangaId: string): Manga => {
     // this is only because they added some really jank alternate titles and didn't propely string escape
     let jsonWithoutAlternateName = json.replace(/"alternateName".*?],/g, '')
     let alternateNames = /"alternateName": \[(.*?)\]/.exec(json)?.[1]
-      .replace(/\"/g, '')
-      .split(',')
+        .replace(/\"/g, '')
+        .split(',')
     let parsedJson = JSON.parse(jsonWithoutAlternateName)
     let entity = parsedJson.mainEntity
     let info = $('.row')
     let imgSource = $('.ImgHolder').html()?.match(/src="(.*)\//)?.[1] ?? ML_IMAGE_DOMAIN
     if (imgSource !== ML_IMAGE_DOMAIN)
-      ML_IMAGE_DOMAIN = imgSource
+        ML_IMAGE_DOMAIN = imgSource
     let image = `${ML_IMAGE_DOMAIN}/${mangaId}.jpg`
     let title = $('h1', info).first().text() ?? ''
     let titles = [title]
@@ -46,36 +47,36 @@ export const parseMangaDetails = ($: CheerioStatic, mangaId: string): Manga => {
 
     let details = $('.list-group', info)
     for (let row of $('li', details).toArray()) {
-      let text = $('.mlabel', row).text()
-      switch (text) {
-        case 'Type:': {
-          let type = $('a', row).text()
-          tagSections[1].tags.push(createTag({ id: type.trim(), label: type.trim() }))
-          break
+        let text = $('.mlabel', row).text()
+        switch (text) {
+            case 'Type:': {
+                let type = $('a', row).text()
+                tagSections[1].tags.push(createTag({ id: type.trim(), label: type.trim() }))
+                break
+            }
+            case 'Status:': {
+                status = $(row).text().includes('Ongoing') ? MangaStatus.ONGOING : MangaStatus.COMPLETED
+                break
+            }
+            case 'Description:': {
+                summary = $('div', row).text().trim()
+                break
+            }
         }
-        case 'Status:': {
-          status = $(row).text().includes('Ongoing') ? MangaStatus.ONGOING : MangaStatus.COMPLETED
-          break
-        }
-        case 'Description:': {
-          summary = $('div', row).text().trim()
-          break
-        }
-      }
     }
 
     return createManga({
-      id: mangaId,
-      titles: titles,
-      image: image,
-      rating: 0,
-      status: status,
-      author: author,
-      tags: tagSections,
-      desc: summary,
-      hentai: hentai,
-      follows: follows,
-      lastUpdate: update
+        id: mangaId,
+        titles: titles,
+        image: image,
+        rating: 0,
+        status: status,
+        author: author,
+        tags: tagSections,
+        desc: summary,
+        hentai: hentai,
+        follows: follows,
+        lastUpdate: update
     })
 }
 
@@ -84,28 +85,28 @@ export const parseChapters = ($: CheerioStatic, mangaId: string): Chapter[] => {
     let chapters: Chapter[] = []
     // following the url encoding that the website uses, same variables too
     chapterJS.forEach((elem: any) => {
-      let chapterCode: string = elem.Chapter
-      let vol = Number(chapterCode.substring(0, 1))
-      let index = vol != 1 ? '-index-' + vol : ''
-      let n = parseInt(chapterCode.slice(1, -1))
-      let a = Number(chapterCode[chapterCode.length - 1])
-      let m = a != 0 ? '.' + a : ''
-      let id = mangaId + '-chapter-' + n + m + index + '.html'
-      let chNum = n + a * .1
-      let name = elem.ChapterName ? elem.ChapterName : '' // can be null
+        let chapterCode: string = elem.Chapter
+        let vol = Number(chapterCode.substring(0, 1))
+        let index = vol != 1 ? '-index-' + vol : ''
+        let n = parseInt(chapterCode.slice(1, -1))
+        let a = Number(chapterCode[chapterCode.length - 1])
+        let m = a != 0 ? '.' + a : ''
+        let id = mangaId + '-chapter-' + n + m + index + '.html'
+        let chNum = n + a * .1
+        let name = elem.ChapterName ? elem.ChapterName : '' // can be null
 
-      let timeStr = elem.Date.replace(/-/g, "/")
-      let time = new Date(timeStr)
+        let timeStr = elem.Date.replace(/-/g, "/")
+        let time = new Date(timeStr)
 
-      chapters.push(createChapter({
-        id: id,
-        mangaId: mangaId,
-        name: name,
-        chapNum: chNum,
-        volume: vol,
-        langCode: LanguageCode.ENGLISH,
-        time: time
-      }))
+        chapters.push(createChapter({
+            id: id,
+            mangaId: mangaId,
+            name: name,
+            chapNum: chNum,
+            volume: vol,
+            langCode: LanguageCode.ENGLISH,
+            time: time
+        }))
     })
 
     return chapters;
@@ -122,15 +123,15 @@ export const parseChapterDetails = ({ data }: any, mangaId: string, chapterId: s
     let chapterImage = odd == 0 ? chapter : chapter + '.' + odd
 
     for (let i = 0; i < pageNum; i++) {
-      let s = '000' + (i + 1)
-      let page = s.substr(s.length - 3)
-      pages.push(`https://${pathName}/manga/${mangaId}/${chapterInfo.Directory == '' ? '' : chapterInfo.Directory + '/'}${chapterImage}-${page}.png`)
+        let s = '000' + (i + 1)
+        let page = s.substr(s.length - 3)
+        pages.push(`https://${pathName}/manga/${mangaId}/${chapterInfo.Directory == '' ? '' : chapterInfo.Directory + '/'}${chapterImage}-${page}.png`)
     }
 
     let chapterDetails = createChapterDetails({
-      id: chapterId,
-      mangaId: mangaId,
-      pages, longStrip: false
+        id: chapterId,
+        mangaId: mangaId,
+        pages, longStrip: false
     })
 
     return chapterDetails
@@ -150,74 +151,77 @@ export const parseUpdatedManga = ({ data }: any, time: Date, ids: string[]): Man
 export const searchMetadata = (query: SearchRequest) => {
     let status = ""
     switch (query.status) {
-      case 0: status = 'Completed'; break
-      case 1: status = 'Ongoing'; break
-      default: status = ''
+        case 0: status = 'Completed'; break
+        case 1: status = 'Ongoing'; break
+        default: status = ''
     }
 
     let genre: string[] | undefined = query.includeGenre ?
-      (query.includeDemographic ? query.includeGenre.concat(query.includeDemographic) : query.includeGenre) :
-      query.includeDemographic
+        (query.includeDemographic ? query.includeGenre.concat(query.includeDemographic) : query.includeGenre) :
+        query.includeDemographic
     let genreNo: string[] | undefined = query.excludeGenre ?
-      (query.excludeDemographic ? query.excludeGenre.concat(query.excludeDemographic) : query.excludeGenre) :
-      query.excludeDemographic
+        (query.excludeDemographic ? query.excludeGenre.concat(query.excludeDemographic) : query.excludeGenre) :
+        query.excludeDemographic
 
     return {
-      'keyword': query.title,
-      'author': query.author || query.artist || '',
-      'status': status,
-      'type': query.includeFormat,
-      'genre': genre,
-      'genreNo': genreNo
+        'keyword': query.title?.toLowerCase(),
+        'author': query.author?.toLowerCase() || query.artist?.toLowerCase() || '',
+        'status': status?.toLowerCase() ?? '',
+        'type': query.includeFormat?.map((x) => x?.toLowerCase() ?? ''),
+        'genre': genre?.map((x) => x?.toLowerCase() ?? ''),
+        'genreNo': genreNo?.map((x) => x?.toLowerCase() ?? '')
     }
 }
 
-export const parseSearch = ($: CheerioStatic, { data }: any, metadata: any): PagedResults => {
+export const parseSearch = ({ data }: any, metadata: any): PagedResults => {
     let mangaTiles: MangaTile[] = []
-    let directory = JSON.parse(data.match(regex['directory'])?.[1])
+    // let script = $('script:not([src])').filter((i, e) => $(e).html()?.includes('vm.Directory') ?? false)
+    let directory: any[] = JSON.parse(data?.match(regex['directory'])?.[1] ?? '')['Directory']
 
-    let imgSource = $('.img-fluid').first().attr('src')?.match(/(.*cover)/)?.[1] ?? ML_IMAGE_DOMAIN
+    let imgSource = data?.match(regex['directory_image_host'])?.[1] ?? '' ?? ML_IMAGE_DOMAIN
     if (imgSource !== ML_IMAGE_DOMAIN)
-      ML_IMAGE_DOMAIN = imgSource
+        ML_IMAGE_DOMAIN = imgSource
 
-    for (const elem of directory)  {
-      let mKeyword: boolean = typeof metadata.keyword !== 'undefined' ? false : true
-      let mAuthor: boolean = metadata.author !== '' ? false : true
-      let mStatus: boolean = metadata.status !== '' ? false : true
-      let mType: boolean = typeof metadata.type !== 'undefined' && metadata.type.length > 0 ? false : true
-      let mGenre: boolean = typeof metadata.genre !== 'undefined' && metadata.genre.length > 0 ? false : true
-      let mGenreNo: boolean = typeof metadata.genreNo !== 'undefined' ? true : false
-      if (!mKeyword) {
-        let allWords: string[] = [elem.s.toLowerCase()].concat(elem.al.map((e: string) => e.toLowerCase()))
-        mKeyword = allWords.filter(key => key.includes(metadata.keyword.toLowerCase())).length > 0
-      }
+    directory.forEach((elem) => {
+        let mKeyword: boolean = typeof metadata.keyword !== 'undefined' ? false : true
+        let mAuthor: boolean = metadata.author !== '' ? false : true
+        let mStatus: boolean = metadata.status !== '' ? false : true
+        let mType: boolean = typeof metadata.type !== 'undefined' && metadata.type.length > 0 ? false : true
+        let mGenre: boolean = typeof metadata.genre !== 'undefined' && metadata.genre.length > 0 ? false : true
+        let mGenreNo: boolean = typeof metadata.genreNo !== 'undefined' ? true : false
+        if (!mKeyword) {
+            let allWords: string = [...(elem.al ?? []), elem.s ?? ''].join('||').toLowerCase()
+            mKeyword = allWords.includes(metadata.keyword)
+        }
 
-      if (!mAuthor) {
-        let authors: string[] = elem.a.map((e: string) => e.toLowerCase())
-        if (authors.includes(metadata.author.toLowerCase())) mAuthor = true
-      }
+        if (!mAuthor) {
+            let authors: string = elem.a?.join('||').toLowerCase() ?? ''
+            if (authors.includes(metadata.author)) mAuthor = true
+        }
 
-      if (!mStatus) {
-        if ((elem.ss == 'Ongoing' && metadata.status == 'Ongoing') || (elem.ss != 'Ongoing' && metadata.ss != 'Ongoing')) mStatus = true
-      }
+        if (!mStatus) {
+            if ((elem.st == 'ongoing' && metadata.status == 'ongoing') || (elem.st != 'ongoing' && metadata.ss != 'ongoing')) mStatus = true
+        }
 
-      if (!mType) mType = metadata.type.includes(elem.t)
-      if (!mGenre) mGenre = metadata.genre.every((i: string) => elem.g.includes(i))
-      if (mGenreNo) mGenreNo = metadata.genreNo.every((i: string) => elem.g.includes(i))
+        let flatG = elem.g?.join('||') ?? ''
 
-      if (mKeyword && mAuthor && mStatus && mType && mGenre && !mGenreNo) {
-        mangaTiles.push(createMangaTile({
-          id: elem.i,
-          title: createIconText({ text: elem.s }),
-          image: `${ML_IMAGE_DOMAIN}/${elem.i}.jpg`,
-          subtitleText: createIconText({ text: elem.ss })
-        }))
-      }
-    }
+        if (!mType) mType = metadata.type.includes(elem.t)
+        if (!mGenre) mGenre = metadata.genre.every((i: string) => flatG.includes(i))
+        if (mGenreNo) mGenreNo = metadata.genreNo.every((i: string) => flatG.includes(i))
+
+        if (mKeyword && mAuthor && mStatus && mType && mGenre && !mGenreNo) {
+            mangaTiles.push(createMangaTile({
+                id: elem.i,
+                title: createIconText({ text: elem.s }),
+                image: `${ML_IMAGE_DOMAIN}/${elem.i}.jpg`,
+                subtitleText: createIconText({ text: elem.st })
+            }))
+        }
+    })
 
     // This source parses JSON and never requires additional pages
     return createPagedResults({
-      results: mangaTiles
+        results: mangaTiles
     })
 }
 
@@ -248,24 +252,24 @@ export const parseHomeSections = ($: CheerioStatic, { data }: any, sectionCallba
 
     let imgSource = $('.ImageHolder').html()?.match(/ng-src="(.*)\//)?.[1] ?? ML_IMAGE_DOMAIN
     if (imgSource !== ML_IMAGE_DOMAIN)
-      ML_IMAGE_DOMAIN = imgSource
+        ML_IMAGE_DOMAIN = imgSource
 
     for (const [i, section] of sections.entries()) {
         sectionCallback(section)
         const manga: MangaTile[] = []
         for (const elem of sectionData[i]) {
-          const id = elem.IndexName
-          const title = elem.SeriesName
-          const image = `${ML_IMAGE_DOMAIN}/${id}.jpg`
-          let time = (new Date(elem.Date)).toDateString()
-          time = time.slice(0, time.length - 5)
-          time = time.slice(4, time.length)
-          manga.push(createMangaTile({
-              id,
-              image,
-              title: createIconText({ text: title }),
-              secondaryText: createIconText({ text: time, icon: 'clock.fill' })
-          }))
+            const id = elem.IndexName
+            const title = elem.SeriesName
+            const image = `${ML_IMAGE_DOMAIN}/${id}.jpg`
+            let time = (new Date(elem.Date)).toDateString()
+            time = time.slice(0, time.length - 5)
+            time = time.slice(4, time.length)
+            manga.push(createMangaTile({
+                id,
+                image,
+                title: createIconText({ text: title }),
+                secondaryText: createIconText({ text: time, icon: 'clock.fill' })
+            }))
         }
         section.items = manga
         sectionCallback(section)
@@ -299,6 +303,6 @@ export const parseViewMore = ({ data }: any, homepageSectionId: string): PagedRe
 
     // This source parses JSON and never requires additional pages
     return createPagedResults({
-      results: manga
+        results: manga
     })
 }

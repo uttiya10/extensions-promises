@@ -18,7 +18,7 @@ const headers = { "content-type": "application/x-www-form-urlencoded" }
 const method = 'GET'
 
 export const MangaLifeInfo: SourceInfo = {
-  version: '2.0.0',
+  version: '2.0.1',
   name: 'Manga4Life',
   icon: 'icon.png',
   author: 'Daniel Kovalevich',
@@ -89,15 +89,15 @@ export class MangaLife extends Source {
   async searchRequest(query: SearchRequest, _metadata: any): Promise<PagedResults> {
     const metadata = searchMetadata(query);
     const request = createRequestObject({
-      url: `${ML_DOMAIN}/search/`,
+      url: `${ML_DOMAIN}/directory/`,
       metadata,
       headers,
       method,
     })
 
     const response = await this.requestManager.schedule(request, 1)
-    const $ = this.cheerio.load(response.data)
-    return parseSearch($, response, metadata);
+    // const $ = this.cheerio.load(response.data)
+    return parseSearch(response, metadata)
   }
 
   async getTags(): Promise<TagSection[] | null> {
