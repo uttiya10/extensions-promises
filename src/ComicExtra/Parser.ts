@@ -1,4 +1,4 @@
-import {Manga, MangaStatus, Tag, TagSection, LanguageCode, Chapter, ChapterDetails, MangaTile} from 'paperback-extensions-common'
+import {Chapter, LanguageCode, Manga, MangaStatus, MangaTile, Tag, TagSection} from 'paperback-extensions-common'
 
 const COMICEXTRA_DOMAIN = 'https://www.comicextra.com'
 
@@ -8,7 +8,7 @@ export class Parser {
     parseMangaDetails($: CheerioSelector, mangaId: string): Manga {
     
 
-    let titles = [$('.title-1', $('.mobile-hide')).text().trimStart()]
+    let titles = [$('.title-1', $('.mobile-hide')).text().trimLeft()]
     let image = $('img', $('.movie-l-img')).attr('src')
 
     let summary = $('#film-content', $('#film-content-wrapper')).text().trim()
@@ -76,9 +76,9 @@ export class Parser {
         titles: titles,
         image: image ?? '',
         status: status,
-        author: author,
+        author: this.decodeHTMLEntity(author ?? ''),
         tags: tagSections,
-        desc: summary,
+        desc: this.decodeHTMLEntity(summary ?? ''),
         lastUpdate: released,
         relatedIds: relatedIds
       })
@@ -94,6 +94,9 @@ export class Parser {
         let chapNum = chapterId?.replace(`chapter-`, '').trim()
         if(isNaN(Number(chapNum))){
           chapNum = `0.${chapNum?.replace( /^\D+/g, '')}`
+            if(isNaN(Number(chapNum))){
+                chapNum = '0'
+            }
         }
         let chapName = $('a', $(obj)).text()
         let time = $($('td', $(obj)).toArray()[1]).text()
@@ -103,7 +106,7 @@ export class Parser {
             mangaId: mangaId,
             chapNum: Number(chapNum),
             langCode: LanguageCode.ENGLISH,
-            name: chapName,
+            name: this.decodeHTMLEntity(chapName),
             time: new Date(time)
         }))
     }
@@ -171,12 +174,7 @@ export class Parser {
         let collectedIds: string[] = []
         for(let obj of $('.cartoon-box').toArray()) {
             let id = $('a', $(obj)).attr('href')?.replace(`${COMICEXTRA_DOMAIN}/comic/`, '')
-            let encodedTitleText = $('h3', $(obj)).text()
-            // Decode title
-            let titleText = encodedTitleText.replace(/&#(\d+);/g, function(match, dec) {
-              return String.fromCharCode(dec);
-            })
-
+            let titleText = this.decodeHTMLEntity($('h3', $(obj)).text())
             let image = $('img', $(obj)).attr('src')
       
             if(titleText == "Not found") continue // If a search result has no data, the only cartoon-box object has "Not Found" as title. Ignore.
@@ -213,12 +211,7 @@ export class Parser {
         let collectedIds: string[] = []
         for(let obj of $('.cartoon-box').toArray()) {
             let id = $('a', $(obj)).attr('href')?.replace(`${COMICEXTRA_DOMAIN}/comic/`, '')
-            let encodedTitleText = $('h3', $(obj)).text().trim()
-            // Decode title
-            let titleText = encodedTitleText.replace(/&#(\d+);/g, function(match, dec) {
-              return String.fromCharCode(dec);
-            })
-
+            let titleText = this.decodeHTMLEntity($('h3', $(obj)).text().trim())
             let image = $('img', $(obj)).attr('src')
 
             if (typeof id === 'undefined' || typeof image === 'undefined') continue
@@ -228,6 +221,7 @@ export class Parser {
                 title: createIconText({text: titleText}),
                 image: image
             }))
+            collectedIds.push(id)
         }
       }
         return tiles
@@ -239,5 +233,11 @@ export class Parser {
         }
       }
       return true
+    }
+    
+    decodeHTMLEntity(str: string): string {
+        return str.replace(/&#(\d+);/g, function (match, dec) {
+            return String.fromCharCode(dec);
+        })
     }
 }

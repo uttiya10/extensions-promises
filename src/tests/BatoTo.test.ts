@@ -1,11 +1,11 @@
 import cheerio from 'cheerio'
 import { APIWrapper, MangaUpdates, Source } from 'paperback-extensions-common';
-import { MangaPill } from '../MangaPill/MangaPill';
+import { BatoTo } from '../BatoTo/BatoTo';
 
-describe('MangaPill Tests', function () {
+describe('BatoTo Tests', function () {
 
     var wrapper: APIWrapper = new APIWrapper();
-    var source: Source = new MangaPill(cheerio);
+    var source: Source = new BatoTo(cheerio);
     var chai = require('chai'), expect = chai.expect, should = chai.should();
     var chaiAsPromised = require('chai-as-promised');
     chai.use(chaiAsPromised);
@@ -15,14 +15,14 @@ describe('MangaPill Tests', function () {
      * Try to choose a manga which is updated frequently, so that the historical checking test can 
      * return proper results, as it is limited to searching 30 days back due to extremely long processing times otherwise.
      */
-    var mangaId = "346/ashita-no-joe";
+    var mangaId = "34805";
 
     it("Retrieve Manga Details", async () => {
         let details = await wrapper.getMangaDetails(source, mangaId);
         expect(details, "No results found with test-defined ID [" + mangaId + "]").to.exist;
 
         // Validate that the fields are filled
-        let data = details;
+        let data = details
         expect(data.id, "Missing ID").to.be.not.empty;
         expect(data.image, "Missing Image").to.be.not.empty;
         expect(data.status, "Missing Status").to.exist;
@@ -38,6 +38,7 @@ describe('MangaPill Tests', function () {
 
         let entry = data[0]
         expect(entry.id, "No ID present").to.not.be.empty;
+        expect(entry.time, "No date present").to.exist
         expect(entry.name, "No title available").to.not.be.empty
         expect(entry.chapNum, "No chapter number present").to.not.be.null
     })
@@ -56,7 +57,7 @@ describe('MangaPill Tests', function () {
 
      it("Testing search", async () => {
          let testSearch = createSearchRequest({
-             title: 'Koe no katachi'
+             title: 'al'
          });
 
          let search = await wrapper.searchRequest(source, testSearch, 1);
@@ -84,9 +85,19 @@ describe('MangaPill Tests', function () {
         await Promise.all(promises)
     })
 
-     /*
+    it("Testing view more", async () => {
+        let data = await wrapper.getViewMoreItems(source, '0', {page: null}) 
+        expect(data, "No server response").to.exist;
+        expect(data, "Empty server response").to.not.be.empty;
+     })
+
+
     it("Testing Notifications", async () => {
-        await wrapper.filterUpdatedManga(source, new Date("2020-12-30"), [mangaId]);
+        let updates = await wrapper.filterUpdatedManga(source, new Date("2021-1-27"), [mangaId])
+        expect(updates, "No server response").to.exist
+        expect(updates, "Empty server response").to.not.be.empty
+        expect(updates[0], "No updates").to.not.be.empty;
     })
-    */
+
+    
 })
