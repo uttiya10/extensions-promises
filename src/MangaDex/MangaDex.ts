@@ -11,6 +11,7 @@ import {
   LanguageCode,
   TagType,
   MangaUpdates,
+  MangaTile,
 } from 'paperback-extensions-common'
 
 import {
@@ -36,13 +37,14 @@ const MANGA_ENDPOINT = PAPERBACK_API + '/manga'
 const CHAPTER_LIST_ENDPOINT = MANGADEX_API + '/manga'
 const CHAPTER_DETAILS_ENDPOINT = MANGADEX_API + '/chapter'
 const SEARCH_ENDPOINT = PAPERBACK_API + '/search'
+const MANGA_RECENT = MANGADEX_DOMAIN + '/updates'
 
 export const MangaDexInfo: SourceInfo = {
   author: 'Neko',
   description: 'Overwrites SafeDex,unlocks all mangas MangaDex has to offer and loads slightly faster. supports notifications',
   icon: 'icon.png',
   name: 'MangaDex Unlocked',
-  version: '2.0.3',
+  version: '2.0.5',
   authorWebsite: 'https://github.com/Pogogo007/extensions-main-promises',
   websiteBaseURL: MANGADEX_DOMAIN,
   hentaiSource: false,
@@ -62,6 +64,10 @@ export class MangaDex extends Source {
     requestsPerSecond: 2,
     requestTimeout: 10000,
   })
+  
+  getMangaShareUrl(mangaId: string): string {
+    return `${MANGADEX_DOMAIN}/manga/${mangaId}`
+  }
 
   async getMangaDetails(mangaId: string): Promise<Manga> {
     const request = createRequestObject({
@@ -164,6 +170,17 @@ export class MangaDex extends Source {
   async getHomePageSections(sectionCallback: (section: HomeSection) => void): Promise<void> {
     const sections = [
       {
+        request: createRequestObject({
+          url: MANGA_RECENT,
+          method: 'GET',
+        }),
+        section: createHomeSection({
+          id: 'recently_updated',
+          title: 'RECENTLY UPDATED TITLES',
+          view_more: true,
+        }),
+      },
+      {
         request: this.constructSearchRequest({
           includeDemographic: ['1'],
         }, 1, 10),
@@ -194,17 +211,67 @@ export class MangaDex extends Source {
       // Get the section data
       promises.push(
         this.requestManager.schedule(section.request, 1).then(response => {
-          const json = JSON.parse(response.data) as any
-          const tiles = this.parser.parseMangaTiles(json)
+          if (section.section.id == 'recently_updated') {
+            let $ = this.cheerio.load(response.data);
+            let updates: MangaTile[] = [];
+            let elem = $('tr', 'tbody').toArray();
+            let i = 0;
 
-          section.section.items = tiles
+            while (i < elem.length) {
+              let hasImg: boolean = false;
+              let idStr: string = $('a.manga_title', elem[i]).attr('href') ?? '';
+              let id: string = (idStr.match(/(\d+)(?=\/)/) ?? '')[0] ?? '';
+              let title: string = $('a.manga_title', elem[i]).text() ?? '';
+              let image: string = (MANGADEX_DOMAIN + $('img', elem[i]).attr('src')) ?? '';
+
+              // in this case: badge will be number of updates
+              // that the manga has received within last week
+              let badge = 0;
+              let pIcon = 'eye.fill';
+              let sIcon = 'clock.fill';
+              let subTitle = '';
+              let pText = '';
+              let sText = '';
+
+              let first = true;
+              i++;
+              while (!hasImg && i < elem.length) {
+                // for the manga tile, we only care about the first/latest entry
+                if (first && !hasImg) {
+                  subTitle = $('a', elem[i]).first().text();
+                  pText = $('.text-center.text-info', elem[i]).text();
+                  sText = $('time', elem[i]).text().replace('ago', '').trim();
+                  first = false;
+                }
+                badge++;
+                i++;
+
+                hasImg = $(elem[i]).find('img').length > 0;
+              }
+
+              updates.push(createMangaTile({
+                id,
+                image,
+                title: createIconText({ text: title }),
+                subtitleText: createIconText({ text: subTitle }),
+                primaryText: createIconText({ text: pText, icon: pIcon }),
+                secondaryText: createIconText({ text: sText, icon: sIcon }),
+                badge
+              }));
+            }
+            section.section.items = updates
+          } else {
+            const json = JSON.parse(response.data) as any
+            const tiles = this.parser.parseMangaTiles(json)
+
+            section.section.items = tiles
+          }
           sectionCallback(section.section)
-        }),
+        })
       )
+      // Make sure the function completes
+      await Promise.all(promises)
     }
-
-    // Make sure the function completes
-    await Promise.all(promises)
   }
 
   async filterUpdatedManga(mangaUpdatesFoundCallback: (updates: MangaUpdates) => void, time: Date, ids: string[]): Promise<void> {
