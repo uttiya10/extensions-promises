@@ -89,21 +89,16 @@ export class Parser {
             if (chapterId == 'Read Chapters') {
                 continue
             }
-            let chapNum = $(obj).text().trim()?.replace(`Chapter `, '')
-            // NaN check
             let chapName = $(obj).text()
-            if (isNaN(Number(chapNum))) {
-                chapNum = `${chapNum.replace(/^\D+/, '') ?? '0'}`.split(/^\D+/)[0]
-                if (isNaN(Number(chapNum))) {
-                    chapNum = '0'
-                }
-            }
+            let chapVol = Number(chapName?.toLowerCase()?.match(/season \D*(\d*\.?\d*)/)?.pop())
+            let chapNum = Number(chapName?.toLowerCase()?.match(/chapter \D*(\d*\.?\d*)/)?.pop())
 
             if (typeof chapterId === 'undefined') continue
             chapters.push(createChapter({
                 id: chapterId,
                 mangaId: mangaId,
-                chapNum: Number(chapNum),
+                chapNum: Number.isNaN(chapNum) ? 0 : chapNum,
+                volume: Number.isNaN(chapVol) ? 0 : chapVol,
                 langCode: LanguageCode.ENGLISH,
                 name: this.decodeHTMLEntity(chapName)
             }))
@@ -119,7 +114,7 @@ export class Parser {
                 sortedChapters.push(c)
             }
         })
-        sortedChapters.sort((a, b) => (a.id > b.id) ? 1 : -1)
+        sortedChapters.sort((a, b) => ((a?.volume ?? 0) - (b?.volume ?? 0) ? -1 : 1 || a?.chapNum - b?.chapNum ? -1 : 1))
         return sortedChapters
     }
 

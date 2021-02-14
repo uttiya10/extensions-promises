@@ -15,7 +15,7 @@ describe('MangaPill Tests', function () {
      * Try to choose a manga which is updated frequently, so that the historical checking test can 
      * return proper results, as it is limited to searching 30 days back due to extremely long processing times otherwise.
      */
-    var mangaId = "346/ashita-no-joe";
+    var mangaId = "1/berserk";
 
     it("Retrieve Manga Details", async () => {
         let details = await wrapper.getMangaDetails(source, mangaId);
@@ -84,9 +84,16 @@ describe('MangaPill Tests', function () {
         await Promise.all(promises)
     })
 
-     /*
     it("Testing Notifications", async () => {
-        await wrapper.filterUpdatedManga(source, new Date("2020-12-30"), [mangaId]);
+        let updates = await wrapper.filterUpdatedManga(source, new Date("2021-02-01"), [mangaId])
+        expect(updates, "No server response").to.exist
+        expect(updates, "Empty server response").to.not.be.empty
+        expect(updates[0], "No updates").to.not.be.empty;
     })
-    */
+
+    it("Get tags", async () => {
+        let tags = await wrapper.getTags(source)
+        expect(tags, "No server response").to.exist
+        expect(tags, "Empty server response").to.not.be.empty
+    })
 })
