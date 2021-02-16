@@ -16,7 +16,7 @@ import {
 const READCOMICSONLINE_DOMAIN = 'https://readcomicsonline.ru'
 
 export const ReadComicsOnlineInfo: SourceInfo = {
-  version: '0.4.0',
+  version: '0.4.1',
   name: 'ReadComicsOnline',
   description: 'Extension that pulls western comics from ReadComicsOnline.ru',
   author: 'Conrad Weiser',
@@ -200,7 +200,7 @@ export class ReadComicsOnline extends Source {
     // Parse the json context
     for (let entry of obj.suggestions) {
       // Is this relevent to the query?
-      if (entry.value.toLowerCase().includes(metadata.searchQuery)) {
+      if (entry.value.toLowerCase().includes(query.title?.toLowerCase())) {
         let image = `${READCOMICSONLINE_DOMAIN}/uploads/manga/${entry.data}/cover/cover_250x350.jpg`
 
         mangaTiles.push(createMangaTile({
