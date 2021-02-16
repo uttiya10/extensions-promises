@@ -339,7 +339,7 @@ exports.ReadComicsOnline = exports.ReadComicsOnlineInfo = void 0;
 const paperback_extensions_common_1 = require("paperback-extensions-common");
 const READCOMICSONLINE_DOMAIN = 'https://readcomicsonline.ru';
 exports.ReadComicsOnlineInfo = {
-    version: '0.4.0',
+    version: '0.4.1',
     name: 'ReadComicsOnline',
     description: 'Extension that pulls western comics from ReadComicsOnline.ru',
     author: 'Conrad Weiser',
@@ -487,6 +487,7 @@ class ReadComicsOnline extends paperback_extensions_common_1.Source {
         });
     }
     searchRequest(query, metadata) {
+        var _a;
         return __awaiter(this, void 0, void 0, function* () {
             let request = createRequestObject({
                 url: `${READCOMICSONLINE_DOMAIN}/search`,
@@ -498,7 +499,7 @@ class ReadComicsOnline extends paperback_extensions_common_1.Source {
             // Parse the json context
             for (let entry of obj.suggestions) {
                 // Is this relevent to the query?
-                if (entry.value.toLowerCase().includes(metadata.searchQuery)) {
+                if (entry.value.toLowerCase().includes((_a = query.title) === null || _a === void 0 ? void 0 : _a.toLowerCase())) {
                     let image = `${READCOMICSONLINE_DOMAIN}/uploads/manga/${entry.data}/cover/cover_250x350.jpg`;
                     mangaTiles.push(createMangaTile({
                         id: entry.data,
