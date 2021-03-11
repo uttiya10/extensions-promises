@@ -9,7 +9,8 @@ import {
   PagedResults,
   SourceInfo,
   MangaUpdates,
-  TagType
+  TagType,
+  RequestHeaders
 } from "paperback-extensions-common"
 import { parseChapterDetails, parseChapters, parseHomeSections, parseMangaDetails, parseSearch, parseTags, parseUpdatedManga, parseViewMore, searchMetadata } from "./MangaLifeParsing"
 
@@ -129,5 +130,11 @@ export class MangaLife extends Source {
 
     const response = await this.requestManager.schedule(request, 1)
     return parseViewMore(response.data, homepageSectionId);
+  }
+
+  globalRequestHeaders(): RequestHeaders {
+    return {
+      referer: ML_DOMAIN
+    }
   }
 }
