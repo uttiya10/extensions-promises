@@ -114,7 +114,14 @@ export const parseChapters = ($: CheerioStatic, mangaId: string): Chapter[] => {
 
 export const parseChapterDetails = (data: any, mangaId: string, chapterId: string): ChapterDetails => {
     const pages: string[] = []
-    const pathName = JSON.parse(data.match(/vm.CurPathName = (.*);/)?.[1])
+
+    // Sometimes, Manga4Life swaps between vm.CurPathName and vm.CurPathNames - Always get whichever one is currently populated at the moment
+    let matchedPath = data.match(/vm.CurPathName = (.*);/)?.[1]
+    if(!matchedPath) {
+        matchedPath = data.match(/vm.CurPathNames = (.*);/)?.[1]
+    }
+
+    const pathName = JSON.parse(data.match(/vm.CurPathNames = (.*);/)?.[1])
     const chapterInfo = JSON.parse(data.match(/vm.CurChapter = (.*);/)?.[1])
     const pageNum = Number(chapterInfo.Page)
 
