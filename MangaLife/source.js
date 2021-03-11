@@ -559,15 +559,14 @@ exports.parseChapters = ($, mangaId) => {
     return chapters;
 };
 exports.parseChapterDetails = (data, mangaId, chapterId) => {
-    var _a, _b, _c, _d;
+    var _a, _b, _c;
     const pages = [];
     // Sometimes, Manga4Life swaps between vm.CurPathName and vm.CurPathNames - Always get whichever one is currently populated at the moment
     let matchedPath = (_a = data.match(/vm.CurPathName = (.*);/)) === null || _a === void 0 ? void 0 : _a[1];
     if (!matchedPath) {
         matchedPath = (_b = data.match(/vm.CurPathNames = (.*);/)) === null || _b === void 0 ? void 0 : _b[1];
     }
-    const pathName = JSON.parse((_c = data.match(/vm.CurPathNames = (.*);/)) === null || _c === void 0 ? void 0 : _c[1]);
-    const chapterInfo = JSON.parse((_d = data.match(/vm.CurChapter = (.*);/)) === null || _d === void 0 ? void 0 : _d[1]);
+    const chapterInfo = JSON.parse((_c = data.match(/vm.CurChapter = (.*);/)) === null || _c === void 0 ? void 0 : _c[1]);
     const pageNum = Number(chapterInfo.Page);
     const chapter = chapterInfo.Chapter.slice(1, -1);
     const odd = chapterInfo.Chapter[chapterInfo.Chapter.length - 1];
@@ -575,7 +574,7 @@ exports.parseChapterDetails = (data, mangaId, chapterId) => {
     for (let i = 0; i < pageNum; i++) {
         const s = '000' + (i + 1);
         const page = s.substr(s.length - 3);
-        pages.push(`https://${pathName}/manga/${mangaId}/${chapterInfo.Directory == '' ? '' : chapterInfo.Directory + '/'}${chapterImage}-${page}.png`);
+        pages.push(`https://${matchedPath}/manga/${mangaId}/${chapterInfo.Directory == '' ? '' : chapterInfo.Directory + '/'}${chapterImage}-${page}.png`);
     }
     return createChapterDetails({
         id: chapterId,
