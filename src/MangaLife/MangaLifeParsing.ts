@@ -118,7 +118,7 @@ export const parseChapterDetails = (data: any, mangaId: string, chapterId: strin
     // Sometimes, Manga4Life swaps between vm.CurPathName and vm.CurPathNames - Always get whichever one is currently populated at the moment
     let matchedPath = data.match(/vm.CurPathName = (.*);/)?.[1]
     if(!matchedPath) {
-        matchedPath = data.match(/vm.CurPathNames = (.*);/)?.[1]
+        matchedPath = data.match(/vm.CurPathNames = "(.*)";/)?.[1]
     }
 
     const chapterInfo = JSON.parse(data.match(/vm.CurChapter = (.*);/)?.[1])

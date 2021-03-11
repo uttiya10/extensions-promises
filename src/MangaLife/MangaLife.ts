@@ -18,7 +18,7 @@ const headers = { "content-type": "application/x-www-form-urlencoded" }
 const method = 'GET'
 
 export const MangaLifeInfo: SourceInfo = {
-  version: '2.1.1',
+  version: '2.1.2',
   name: 'Manga4Life',
   icon: 'icon.png',
   author: 'Daniel Kovalevich',
