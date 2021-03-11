@@ -121,7 +121,6 @@ export const parseChapterDetails = (data: any, mangaId: string, chapterId: strin
         matchedPath = data.match(/vm.CurPathNames = (.*);/)?.[1]
     }
 
-    const pathName = JSON.parse(data.match(/vm.CurPathNames = (.*);/)?.[1])
     const chapterInfo = JSON.parse(data.match(/vm.CurChapter = (.*);/)?.[1])
     const pageNum = Number(chapterInfo.Page)
 
@@ -132,7 +131,7 @@ export const parseChapterDetails = (data: any, mangaId: string, chapterId: strin
     for (let i = 0; i < pageNum; i++) {
       const s = '000' + (i + 1)
       const page = s.substr(s.length - 3)
-      pages.push(`https://${pathName}/manga/${mangaId}/${chapterInfo.Directory == '' ? '' : chapterInfo.Directory + '/'}${chapterImage}-${page}.png`)
+      pages.push(`https://${matchedPath}/manga/${mangaId}/${chapterInfo.Directory == '' ? '' : chapterInfo.Directory + '/'}${chapterImage}-${page}.png`)
     }
 
     return createChapterDetails({
