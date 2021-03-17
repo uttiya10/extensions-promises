@@ -1,11 +1,11 @@
 import cheerio from 'cheerio'
 import { APIWrapper, Source } from 'paperback-extensions-common';
-import { MangaSee } from '../MangaSee/MangaSee';
+import { Mangasee } from '../Mangasee/MangaSee';
 
 describe('MangaSee Tests', function () {
 
     var wrapper: APIWrapper = new APIWrapper();
-    var source: Source = new MangaSee(cheerio);
+    var source: Source = new Mangasee(cheerio);
     var chai = require('chai'), expect = chai.expect, should = chai.should();
     var chaiAsPromised = require('chai-as-promised');
     chai.use(chaiAsPromised);

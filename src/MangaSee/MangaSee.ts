@@ -18,8 +18,8 @@ export const MS_DOMAIN = 'https://mangasee123.com'
 const headers = { "content-type": "application/x-www-form-urlencoded" }
 const method = 'GET'
 
-export const MangaSeeInfo: SourceInfo = {
-  version: '2.1.5',
+export const MangaseeInfo: SourceInfo = {
+  version: '2.1.6',
   name: 'Mangasee',
   icon: 'Logo.png',
   author: 'Daniel Kovalevich',
@@ -35,7 +35,7 @@ export const MangaSeeInfo: SourceInfo = {
   ]
 }
 
-export class MangaSee extends Source {
+export class Mangasee extends Source {
   getMangaShareUrl(mangaId: string): string | null { return `${MS_DOMAIN}/manga/${mangaId}` }
 
   async getMangaDetails(mangaId: string): Promise<Manga> {
