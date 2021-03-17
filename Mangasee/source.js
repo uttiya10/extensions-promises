@@ -325,144 +325,6 @@ __exportStar(require("./UserForm"), exports);
 
 },{"./Chapter":5,"./ChapterDetails":6,"./Constants":7,"./HomeSection":8,"./Languages":9,"./Manga":10,"./MangaTile":11,"./MangaUpdate":12,"./OAuth":13,"./PagedResults":14,"./RequestHeaders":15,"./RequestManager":16,"./RequestObject":17,"./ResponseObject":18,"./SearchRequest":19,"./SourceInfo":20,"./SourceTag":21,"./TagSection":22,"./TrackObject":23,"./UserForm":24}],26:[function(require,module,exports){
 "use strict";
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.Mangasee = exports.MangaseeInfo = exports.MS_DOMAIN = void 0;
-const paperback_extensions_common_1 = require("paperback-extensions-common");
-const MangaSeeParsing_1 = require("./MangaSeeParsing");
-exports.MS_DOMAIN = 'https://mangasee123.com';
-const headers = { "content-type": "application/x-www-form-urlencoded" };
-const method = 'GET';
-exports.MangaseeInfo = {
-    version: '2.1.6',
-    name: 'Mangasee',
-    icon: 'Logo.png',
-    author: 'Daniel Kovalevich',
-    authorWebsite: 'https://github.com/DanielKovalevich',
-    description: 'Extension that pulls manga from MangaSee, includes Advanced Search and Updated manga fetching',
-    hentaiSource: false,
-    websiteBaseURL: exports.MS_DOMAIN,
-    sourceTags: [
-        {
-            text: "Notifications",
-            type: paperback_extensions_common_1.TagType.GREEN
-        }
-    ]
-};
-class Mangasee extends paperback_extensions_common_1.Source {
-    getMangaShareUrl(mangaId) { return `${exports.MS_DOMAIN}/manga/${mangaId}`; }
-    getMangaDetails(mangaId) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const request = createRequestObject({
-                url: `${exports.MS_DOMAIN}/manga/`,
-                method,
-                param: mangaId
-            });
-            const response = yield this.requestManager.schedule(request, 1);
-            let $ = this.cheerio.load(response.data);
-            return MangaSeeParsing_1.parseMangaDetails($, mangaId);
-        });
-    }
-    getChapters(mangaId) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const request = createRequestObject({
-                url: `${exports.MS_DOMAIN}/manga/`,
-                method,
-                headers,
-                param: mangaId
-            });
-            const response = yield this.requestManager.schedule(request, 1);
-            const $ = this.cheerio.load(response.data);
-            return MangaSeeParsing_1.parseChapters($, mangaId);
-        });
-    }
-    getChapterDetails(mangaId, chapterId) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const request = createRequestObject({
-                url: `${exports.MS_DOMAIN}/read-online/`,
-                headers,
-                method,
-                param: chapterId
-            });
-            const response = yield this.requestManager.schedule(request, 1);
-            return MangaSeeParsing_1.parseChapterDetails(response.data, mangaId, chapterId);
-        });
-    }
-    filterUpdatedManga(mangaUpdatesFoundCallback, time, ids) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const request = createRequestObject({
-                url: `${exports.MS_DOMAIN}/`,
-                headers,
-                method,
-            });
-            const response = yield this.requestManager.schedule(request, 1);
-            const returnObject = MangaSeeParsing_1.parseUpdatedManga(response, time, ids);
-            mangaUpdatesFoundCallback(createMangaUpdates(returnObject));
-        });
-    }
-    searchRequest(query, _metadata) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const metadata = MangaSeeParsing_1.searchMetadata(query);
-            const request = createRequestObject({
-                url: `${exports.MS_DOMAIN}/directory/`,
-                metadata,
-                headers,
-                method,
-            });
-            const response = yield this.requestManager.schedule(request, 1);
-            return MangaSeeParsing_1.parseSearch(response.data, metadata);
-        });
-    }
-    getTags() {
-        return __awaiter(this, void 0, void 0, function* () {
-            const request = createRequestObject({
-                url: `${exports.MS_DOMAIN}/search/`,
-                method,
-                headers,
-            });
-            const response = yield this.requestManager.schedule(request, 1);
-            return MangaSeeParsing_1.parseTags(response.data);
-        });
-    }
-    getHomePageSections(sectionCallback) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const request = createRequestObject({
-                url: `${exports.MS_DOMAIN}`,
-                method,
-            });
-            const response = yield this.requestManager.schedule(request, 1);
-            const $ = this.cheerio.load(response.data);
-            MangaSeeParsing_1.parseHomeSections($, response.data, sectionCallback);
-        });
-    }
-    getViewMoreItems(homepageSectionId, _metadata) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const request = createRequestObject({
-                url: exports.MS_DOMAIN,
-                method,
-            });
-            const response = yield this.requestManager.schedule(request, 1);
-            return MangaSeeParsing_1.parseViewMore(response.data, homepageSectionId);
-        });
-    }
-    globalRequestHeaders() {
-        return {
-            referer: exports.MS_DOMAIN
-        };
-    }
-}
-exports.Mangasee = Mangasee;
-
-},{"./MangaSeeParsing":27,"paperback-extensions-common":4}],27:[function(require,module,exports){
-"use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.parseViewMore = exports.parseHomeSections = exports.parseTags = exports.parseSearch = exports.searchMetadata = exports.parseUpdatedManga = exports.parseChapterDetails = exports.parseChapters = exports.parseMangaDetails = exports.regex = void 0;
 const paperback_extensions_common_1 = require("paperback-extensions-common");
@@ -748,5 +610,143 @@ exports.parseViewMore = (data, homepageSectionId) => {
     });
 };
 
-},{"paperback-extensions-common":4}]},{},[26])(26)
+},{"paperback-extensions-common":4}],27:[function(require,module,exports){
+"use strict";
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.Mangasee = exports.MangaseeInfo = exports.MS_DOMAIN = void 0;
+const paperback_extensions_common_1 = require("paperback-extensions-common");
+const MangaSeeParsing_1 = require("./MangaSeeParsing");
+exports.MS_DOMAIN = 'https://mangasee123.com';
+const headers = { "content-type": "application/x-www-form-urlencoded" };
+const method = 'GET';
+exports.MangaseeInfo = {
+    version: '2.1.6',
+    name: 'Mangasee',
+    icon: 'Logo.png',
+    author: 'Daniel Kovalevich',
+    authorWebsite: 'https://github.com/DanielKovalevich',
+    description: 'Extension that pulls manga from MangaSee, includes Advanced Search and Updated manga fetching',
+    hentaiSource: false,
+    websiteBaseURL: exports.MS_DOMAIN,
+    sourceTags: [
+        {
+            text: "Notifications",
+            type: paperback_extensions_common_1.TagType.GREEN
+        }
+    ]
+};
+class Mangasee extends paperback_extensions_common_1.Source {
+    getMangaShareUrl(mangaId) { return `${exports.MS_DOMAIN}/manga/${mangaId}`; }
+    getMangaDetails(mangaId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const request = createRequestObject({
+                url: `${exports.MS_DOMAIN}/manga/`,
+                method,
+                param: mangaId
+            });
+            const response = yield this.requestManager.schedule(request, 1);
+            let $ = this.cheerio.load(response.data);
+            return MangaSeeParsing_1.parseMangaDetails($, mangaId);
+        });
+    }
+    getChapters(mangaId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const request = createRequestObject({
+                url: `${exports.MS_DOMAIN}/manga/`,
+                method,
+                headers,
+                param: mangaId
+            });
+            const response = yield this.requestManager.schedule(request, 1);
+            const $ = this.cheerio.load(response.data);
+            return MangaSeeParsing_1.parseChapters($, mangaId);
+        });
+    }
+    getChapterDetails(mangaId, chapterId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const request = createRequestObject({
+                url: `${exports.MS_DOMAIN}/read-online/`,
+                headers,
+                method,
+                param: chapterId
+            });
+            const response = yield this.requestManager.schedule(request, 1);
+            return MangaSeeParsing_1.parseChapterDetails(response.data, mangaId, chapterId);
+        });
+    }
+    filterUpdatedManga(mangaUpdatesFoundCallback, time, ids) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const request = createRequestObject({
+                url: `${exports.MS_DOMAIN}/`,
+                headers,
+                method,
+            });
+            const response = yield this.requestManager.schedule(request, 1);
+            const returnObject = MangaSeeParsing_1.parseUpdatedManga(response, time, ids);
+            mangaUpdatesFoundCallback(createMangaUpdates(returnObject));
+        });
+    }
+    searchRequest(query, _metadata) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const metadata = MangaSeeParsing_1.searchMetadata(query);
+            const request = createRequestObject({
+                url: `${exports.MS_DOMAIN}/directory/`,
+                metadata,
+                headers,
+                method,
+            });
+            const response = yield this.requestManager.schedule(request, 1);
+            return MangaSeeParsing_1.parseSearch(response.data, metadata);
+        });
+    }
+    getTags() {
+        return __awaiter(this, void 0, void 0, function* () {
+            const request = createRequestObject({
+                url: `${exports.MS_DOMAIN}/search/`,
+                method,
+                headers,
+            });
+            const response = yield this.requestManager.schedule(request, 1);
+            return MangaSeeParsing_1.parseTags(response.data);
+        });
+    }
+    getHomePageSections(sectionCallback) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const request = createRequestObject({
+                url: `${exports.MS_DOMAIN}`,
+                method,
+            });
+            const response = yield this.requestManager.schedule(request, 1);
+            const $ = this.cheerio.load(response.data);
+            MangaSeeParsing_1.parseHomeSections($, response.data, sectionCallback);
+        });
+    }
+    getViewMoreItems(homepageSectionId, _metadata) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const request = createRequestObject({
+                url: exports.MS_DOMAIN,
+                method,
+            });
+            const response = yield this.requestManager.schedule(request, 1);
+            return MangaSeeParsing_1.parseViewMore(response.data, homepageSectionId);
+        });
+    }
+    globalRequestHeaders() {
+        return {
+            referer: exports.MS_DOMAIN
+        };
+    }
+}
+exports.Mangasee = Mangasee;
+
+},{"./MangaSeeParsing":26,"paperback-extensions-common":4}]},{},[27])(27)
 });
