@@ -335,14 +335,14 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.MangaSee = exports.MangaSeeInfo = exports.MS_DOMAIN = void 0;
+exports.Mangasee = exports.MangaseeInfo = exports.MS_DOMAIN = void 0;
 const paperback_extensions_common_1 = require("paperback-extensions-common");
 const MangaSeeParsing_1 = require("./MangaSeeParsing");
 exports.MS_DOMAIN = 'https://mangasee123.com';
 const headers = { "content-type": "application/x-www-form-urlencoded" };
 const method = 'GET';
-exports.MangaSeeInfo = {
-    version: '2.1.5',
+exports.MangaseeInfo = {
+    version: '2.1.6',
     name: 'Mangasee',
     icon: 'Logo.png',
     author: 'Daniel Kovalevich',
@@ -357,7 +357,7 @@ exports.MangaSeeInfo = {
         }
     ]
 };
-class MangaSee extends paperback_extensions_common_1.Source {
+class Mangasee extends paperback_extensions_common_1.Source {
     getMangaShareUrl(mangaId) { return `${exports.MS_DOMAIN}/manga/${mangaId}`; }
     getMangaDetails(mangaId) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -459,7 +459,7 @@ class MangaSee extends paperback_extensions_common_1.Source {
         };
     }
 }
-exports.MangaSee = MangaSee;
+exports.Mangasee = Mangasee;
 
 },{"./MangaSeeParsing":27,"paperback-extensions-common":4}],27:[function(require,module,exports){
 "use strict";
