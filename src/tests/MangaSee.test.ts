@@ -1,6 +1,6 @@
 import cheerio from 'cheerio'
 import { APIWrapper, Source } from 'paperback-extensions-common';
-import { Mangasee } from '../Mangasee/MangaSee';
+import { Mangasee } from '../Mangasee/Mangasee';
 
 describe('MangaSee Tests', function () {
 
