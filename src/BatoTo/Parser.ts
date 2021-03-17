@@ -1,7 +1,7 @@
 import {Chapter, Manga, MangaStatus, MangaTile, Tag, TagSection} from 'paperback-extensions-common'
 import {reverseLangCode} from "./Languages"
 
-const CryptoJS = require('./external/crypto.min.js')
+const CryptoJS = require('crypto-js')
 
 export class Parser {
 
