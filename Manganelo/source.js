@@ -344,7 +344,7 @@ const headers = {
     "content-type": "application/x-www-form-urlencoded"
 };
 exports.ManganeloInfo = {
-    version: '2.1.0',
+    version: '2.1.1',
     name: 'Manganelo',
     icon: 'icon.png',
     author: 'Daniel Kovalevich',
@@ -586,7 +586,8 @@ exports.parseMangaDetails = ($, mangaId) => {
         follows,
         lastUpdate,
         desc: summary,
-        hentai
+        //hentai
+        hentai: false
     });
 };
 exports.parseChapters = ($, mangaId) => {

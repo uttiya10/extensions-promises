@@ -391,7 +391,8 @@ exports.parseMangaDetails = ($, mangaId) => {
         author,
         tags: tagSections,
         desc,
-        hentai,
+        //hentai,
+        hentai: false,
         follows,
         lastUpdate
     });
@@ -629,7 +630,7 @@ exports.MS_DOMAIN = 'https://mangasee123.com';
 const headers = { "content-type": "application/x-www-form-urlencoded" };
 const method = 'GET';
 exports.MangaseeInfo = {
-    version: '2.1.6',
+    version: '2.1.7',
     name: 'Mangasee',
     icon: 'Logo.png',
     author: 'Daniel Kovalevich',

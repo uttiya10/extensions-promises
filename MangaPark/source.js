@@ -341,7 +341,7 @@ const MangaParkParser_1 = require("./MangaParkParser");
 const MP_DOMAIN = 'https://mangapark.net';
 const method = 'GET';
 exports.MangaParkInfo = {
-    version: '2.0.0',
+    version: '2.0.1',
     name: 'MangaPark',
     icon: 'icon.png',
     author: 'Daniel Kovalevich',
@@ -595,7 +595,8 @@ exports.parseMangaDetails = ($, mangaId) => {
         tags: tagSections,
         views,
         desc,
-        hentai
+        //hentai
+        hentai: false
     });
 };
 exports.parseChapters = ($, mangaId) => {

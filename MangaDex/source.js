@@ -362,7 +362,7 @@ exports.MangaDexInfo = {
     description: 'Overwrites SafeDex,unlocks all mangas MangaDex has to offer and loads slightly faster. supports notifications',
     icon: 'icon.png',
     name: 'MangaDex Unlocked',
-    version: '2.0.7',
+    version: '2.0.8',
     authorWebsite: 'https://github.com/Pogogo007/extensions-main-promises',
     websiteBaseURL: MANGADEX_DOMAIN,
     hentaiSource: false,
@@ -522,38 +522,36 @@ class MangaDex extends paperback_extensions_common_1.Source {
             yield Promise.all(promises);
         });
     }
-    filterUpdatedManga(mangaUpdatesFoundCallback, time, ids) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const allManga = new Set(ids);
-            let hasManga = true;
-            let page = 1;
-            while (hasManga) {
-                const request = createRequestObject({
-                    url: 'https://mangadex.org/titles/0/' + (page++).toString(),
-                    method: 'GET',
-                    incognito: true,
-                    cookies: [
-                        createCookie({
-                            name: 'mangadex_title_mode',
-                            value: '2',
-                            domain: MANGADEX_DOMAIN,
-                        }),
-                    ],
-                });
-                // eslint-disable-next-line no-await-in-loop
-                const response = yield this.requestManager.schedule(request, 1);
-                const selector = this.cheerio.load(response.data);
-                const updatedManga = this.parser.filterUpdatedManga(selector, time, allManga);
-                hasManga = updatedManga.hasMore;
-                if (updatedManga.updates.length > 0) {
-                    // If we found updates on this page, notify the app
-                    // This is needed so that the app can save the updates
-                    // in case the background job is killed by iOS
-                    mangaUpdatesFoundCallback(createMangaUpdates({ ids: updatedManga.updates }));
-                }
-            }
-        });
-    }
+    // async filterUpdatedManga(mangaUpdatesFoundCallback: (updates: MangaUpdates) => void, time: Date, ids: string[]): Promise<void> {
+    //   const allManga = new Set(ids)
+    //   let hasManga = true
+    //   let page = 1
+    //   while (hasManga) {
+    //     const request = createRequestObject({
+    //       url: 'https://mangadex.org/titles/0/' + (page++).toString(),
+    //       method: 'GET',
+    //       incognito: true,
+    //       cookies: [
+    //         createCookie({
+    //           name: 'mangadex_title_mode',
+    //           value: '2',
+    //           domain: MANGADEX_DOMAIN,
+    //         }),
+    //       ],
+    //     })
+    //     // eslint-disable-next-line no-await-in-loop
+    //     const response = await this.requestManager.schedule(request, 1)
+    //     const selector = this.cheerio.load(response.data)
+    //     const updatedManga = this.parser.filterUpdatedManga(selector, time, allManga)
+    //     hasManga = updatedManga.hasMore
+    //     if (updatedManga.updates.length > 0) {
+    //       // If we found updates on this page, notify the app
+    //       // This is needed so that the app can save the updates
+    //       // in case the background job is killed by iOS
+    //       mangaUpdatesFoundCallback(createMangaUpdates({ ids: updatedManga.updates }))
+    //     }
+    //   }
+    // }
     constructSearchRequest(query, page, items = 50) {
         var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k;
         return createRequestObject({

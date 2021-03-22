@@ -30325,7 +30325,7 @@ const paperback_extensions_common_1 = require("paperback-extensions-common");
 const Parser_1 = require("./Parser");
 const BATOTO_DOMAIN = 'https://bato.to';
 exports.BatoToInfo = {
-    version: '1.1.5',
+    version: '1.1.6',
     name: 'Bato.To',
     description: 'Extension that pulls western comics from bato.to',
     author: 'GameFuzzy',
@@ -30718,7 +30718,8 @@ class Parser {
             tags: tagSections,
             desc: this.decodeHTMLEntity(summary),
             lastUpdate: released,
-            hentai: isHentai,
+            //hentai: isHentai,
+            hentai: false,
             views: views
         });
     }
