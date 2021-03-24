@@ -362,7 +362,7 @@ exports.MangaDexInfo = {
     description: 'Overwrites SafeDex,unlocks all mangas MangaDex has to offer and loads slightly faster. supports notifications',
     icon: 'icon.png',
     name: 'MangaDex Unlocked',
-    version: '2.0.8',
+    version: '2.0.9',
     authorWebsite: 'https://github.com/Pogogo007/extensions-main-promises',
     websiteBaseURL: MANGADEX_DOMAIN,
     hentaiSource: false,
@@ -522,36 +522,38 @@ class MangaDex extends paperback_extensions_common_1.Source {
             yield Promise.all(promises);
         });
     }
-    // async filterUpdatedManga(mangaUpdatesFoundCallback: (updates: MangaUpdates) => void, time: Date, ids: string[]): Promise<void> {
-    //   const allManga = new Set(ids)
-    //   let hasManga = true
-    //   let page = 1
-    //   while (hasManga) {
-    //     const request = createRequestObject({
-    //       url: 'https://mangadex.org/titles/0/' + (page++).toString(),
-    //       method: 'GET',
-    //       incognito: true,
-    //       cookies: [
-    //         createCookie({
-    //           name: 'mangadex_title_mode',
-    //           value: '2',
-    //           domain: MANGADEX_DOMAIN,
-    //         }),
-    //       ],
-    //     })
-    //     // eslint-disable-next-line no-await-in-loop
-    //     const response = await this.requestManager.schedule(request, 1)
-    //     const selector = this.cheerio.load(response.data)
-    //     const updatedManga = this.parser.filterUpdatedManga(selector, time, allManga)
-    //     hasManga = updatedManga.hasMore
-    //     if (updatedManga.updates.length > 0) {
-    //       // If we found updates on this page, notify the app
-    //       // This is needed so that the app can save the updates
-    //       // in case the background job is killed by iOS
-    //       mangaUpdatesFoundCallback(createMangaUpdates({ ids: updatedManga.updates }))
-    //     }
-    //   }
-    // }
+    filterUpdatedManga(mangaUpdatesFoundCallback, time, ids) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const allManga = new Set(ids);
+            let hasManga = true;
+            let page = 1;
+            while (hasManga) {
+                const request = createRequestObject({
+                    url: 'https://mangadex.org/titles/0/' + (page++).toString(),
+                    method: 'GET',
+                    incognito: true,
+                    cookies: [
+                        createCookie({
+                            name: 'mangadex_title_mode',
+                            value: '2',
+                            domain: MANGADEX_DOMAIN,
+                        }),
+                    ],
+                });
+                // eslint-disable-next-line no-await-in-loop
+                const response = yield this.requestManager.schedule(request, 1);
+                const selector = this.cheerio.load(response.data);
+                const updatedManga = this.parser.filterUpdatedManga(selector, time, allManga);
+                hasManga = updatedManga.hasMore;
+                if (updatedManga.updates.length > 0) {
+                    // If we found updates on this page, notify the app
+                    // This is needed so that the app can save the updates
+                    // in case the background job is killed by iOS
+                    mangaUpdatesFoundCallback(createMangaUpdates({ ids: updatedManga.updates }));
+                }
+            }
+        });
+    }
     constructSearchRequest(query, page, items = 50) {
         var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k;
         return createRequestObject({
@@ -616,6 +618,7 @@ exports.MangaDex = MangaDex;
 /* eslint-disable camelcase, @typescript-eslint/explicit-module-boundary-types, radix, unicorn/filename-case */
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Parser = void 0;
+const MANGAPLUS_GROUP_ID = 9097;
 class Parser {
     parseMangaDetails(json) {
         var _a;
@@ -675,16 +678,18 @@ class Parser {
         let chapters = [];
         const groups = Object.assign({}, ...json.data.groups.map((x) => ({ [x.id]: x.name })));
         for (const chapter of json.data.chapters) {
-            chapters.push(createChapter({
-                id: chapter.id.toString(),
-                mangaId: mangaId,
-                chapNum: Number(chapter.chapter),
-                langCode: chapter.language,
-                volume: Number.isNaN(chapter.volume) ? 0 : Number(chapter.volume),
-                group: chapter.groups.map((x) => groups[x]).join(', '),
-                name: chapter.title,
-                time: new Date(Number(chapter.timestamp) * 1000)
-            }));
+            if (!chapter.groups.includes(MANGAPLUS_GROUP_ID)) {
+                chapters.push(createChapter({
+                    id: chapter.id.toString(),
+                    mangaId: mangaId,
+                    chapNum: Number(chapter.chapter),
+                    langCode: chapter.language,
+                    volume: Number.isNaN(chapter.volume) ? 0 : Number(chapter.volume),
+                    group: chapter.groups.map((x) => groups[x]).join(', '),
+                    name: chapter.title,
+                    time: new Date(Number(chapter.timestamp) * 1000)
+                }));
+            }
         }
         return chapters;
     }
@@ -700,7 +705,8 @@ class Parser {
         var _a;
         console.log(`REFERENCE TIME: ${referenceTime}`);
         const ids = [];
-        for (const elem of $('.manga-entry').toArray()) {
+        const entries = $('.manga-entry').toArray();
+        for (const elem of entries) {
             const id = elem.attribs['data-id'];
             const mangaDate = new Date(((_a = $(elem).find('time').attr('datetime')) !== null && _a !== void 0 ? _a : '').replace(/-/g, '/'));
             console.log(`${id} updated at ${mangaDate}}`);
@@ -715,7 +721,7 @@ class Parser {
             }
         }
         console.log(`Found ${ids.length} updates`);
-        return { updates: ids, hasMore: true };
+        return { updates: ids, hasMore: entries.length > 0 };
     }
     parseMangaTiles(json) {
         var _a;
