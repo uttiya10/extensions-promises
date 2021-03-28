@@ -630,7 +630,7 @@ exports.MS_DOMAIN = 'https://mangasee123.com';
 const headers = { "content-type": "application/x-www-form-urlencoded" };
 const method = 'GET';
 exports.MangaseeInfo = {
-    version: '2.1.8',
+    version: '2.1.9',
     name: 'Mangasee',
     icon: 'Logo.png',
     author: 'Daniel Kovalevich',
@@ -642,6 +642,10 @@ exports.MangaseeInfo = {
         {
             text: "Notifications",
             type: paperback_extensions_common_1.TagType.GREEN
+        },
+        {
+            text: "Cloudflare",
+            type: paperback_extensions_common_1.TagType.RED
         }
     ]
 };
