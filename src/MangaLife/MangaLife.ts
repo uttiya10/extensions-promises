@@ -19,7 +19,7 @@ const headers = { "content-type": "application/x-www-form-urlencoded" }
 const method = 'GET'
 
 export const MangaLifeInfo: SourceInfo = {
-  version: '2.1.5',
+  version: '2.1.6',
   name: 'Manga4Life',
   icon: 'icon.png',
   author: 'Daniel Kovalevich',
@@ -137,4 +137,11 @@ export class MangaLife extends Source {
       referer: ML_DOMAIN
     }
   }
+
+  cloudflareBypassRequest() {
+    return createRequestObject({
+        url: `${ML_DOMAIN}`,
+        method: 'GET',
+    })
+}
 }

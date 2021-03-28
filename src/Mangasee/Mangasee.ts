@@ -19,7 +19,7 @@ const headers = { "content-type": "application/x-www-form-urlencoded" }
 const method = 'GET'
 
 export const MangaseeInfo: SourceInfo = {
-  version: '2.1.7',
+  version: '2.1.8',
   name: 'Mangasee',
   icon: 'Logo.png',
   author: 'Daniel Kovalevich',
@@ -137,4 +137,11 @@ export class Mangasee extends Source {
       referer: MS_DOMAIN
     }
   }
+
+  cloudflareBypassRequest() {
+    return createRequestObject({
+        url: `${MS_DOMAIN}`,
+        method: 'GET',
+    })
+}
 }
