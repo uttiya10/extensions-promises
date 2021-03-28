@@ -342,7 +342,7 @@ exports.ML_DOMAIN = 'https://manga4life.com';
 const headers = { "content-type": "application/x-www-form-urlencoded" };
 const method = 'GET';
 exports.MangaLifeInfo = {
-    version: '2.1.7',
+    version: '2.1.8',
     name: 'Manga4Life',
     icon: 'icon.png',
     author: 'Daniel Kovalevich',
@@ -462,7 +462,7 @@ class MangaLife extends paperback_extensions_common_1.Source {
             referer: exports.ML_DOMAIN
         };
     }
-    cloudflareBypassRequest() {
+    getCloudflareBypassRequest() {
         return createRequestObject({
             url: `${exports.ML_DOMAIN}`,
             method: 'GET',
