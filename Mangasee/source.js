@@ -630,7 +630,7 @@ exports.MS_DOMAIN = 'https://mangasee123.com';
 const headers = { "content-type": "application/x-www-form-urlencoded" };
 const method = 'GET';
 exports.MangaseeInfo = {
-    version: '2.1.7',
+    version: '2.1.8',
     name: 'Mangasee',
     icon: 'Logo.png',
     author: 'Daniel Kovalevich',
@@ -745,6 +745,12 @@ class Mangasee extends paperback_extensions_common_1.Source {
         return {
             referer: exports.MS_DOMAIN
         };
+    }
+    cloudflareBypassRequest() {
+        return createRequestObject({
+            url: `${exports.MS_DOMAIN}`,
+            method: 'GET',
+        });
     }
 }
 exports.Mangasee = Mangasee;
