@@ -90,9 +90,37 @@ export class Parser {
     parseSearchResults($: CheerioSelector, cheerio: any): MangaTile[] { 
         let mangaTiles: MangaTile[] = []
         let collectedIds: string[] = []
-        for(let obj of $('tr', $('.listing')).toArray()) {
+
+        let directManga = $('.barTitle',$('.rightBox')).first().text().trim()
+
+
+        if (directManga === 'Cover'){
+          let titleText = $('.bigChar', $('.bigBarContainer').first()).text().trim()
+          let id = ($('a'), $('.bigChar').attr('href')?.replace('/Comic/', '')) ?? ''
+          let url = $('img', $('.rightBox')).attr('src')
+          let image = url?.includes('http') ? url : `${READCOMICTO_DOMAIN}${url}`
+          if(id === undefined) {
+
+            console.log("Something went wrong, Manga ID Undefined")
+            return []
             
-            let titleText = this.decodeHTMLEntity($('a',$(obj)).text().replace('\n','').trim())
+          }else{
+            
+            if(!collectedIds.includes(id)) {
+              mangaTiles.push(createMangaTile({
+                  id: id,
+                  title: createIconText({text: titleText}),
+                  image: image
+              }))
+              collectedIds.push(id)
+            }
+            
+          }
+
+        }else{
+          for(let obj of $('tr', $('.listing')).toArray()) {
+            
+            let titleText = this.decodeHTMLEntity($('a',$(obj)).first().text().replace('\n','').trim())
             let id = $('a',$(obj)).attr('href')?.replace('/Comic/', '')
             if(!titleText || !id) { 
               continue
@@ -100,7 +128,8 @@ export class Parser {
             }
             //Tooltip Selecting 
             let imageCheerio = cheerio.load($('td', $(obj)).first().attr('title') ?? '')
-            let image = `${READCOMICTO_DOMAIN}${imageCheerio('img').attr('src')}`
+            let url = this.decodeHTMLEntity(imageCheerio('img').attr('src'))
+            let image = url.includes('http') ? url : `${READCOMICTO_DOMAIN}${url}`
 
             if (typeof id === 'undefined' || typeof image === 'undefined' ) continue
             if(!collectedIds.includes(id)) {
@@ -111,6 +140,8 @@ export class Parser {
             }))
             collectedIds.push(id)
           }
+        }
+
     }
     return mangaTiles
     }
