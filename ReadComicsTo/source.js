@@ -398,27 +398,51 @@ class Parser {
         return pages.map(match => match[1]);
     }
     parseSearchResults($, cheerio) {
-        var _a, _b;
+        var _a, _b, _c, _d;
         let mangaTiles = [];
         let collectedIds = [];
-        for (let obj of $('tr', $('.listing')).toArray()) {
-            let titleText = this.decodeHTMLEntity($('a', $(obj)).text().replace('\n', '').trim());
-            let id = (_a = $('a', $(obj)).attr('href')) === null || _a === void 0 ? void 0 : _a.replace('/Comic/', '');
-            if (!titleText || !id) {
-                continue;
+        let directManga = $('.barTitle', $('.rightBox')).first().text().trim();
+        if (directManga === 'Cover') {
+            let titleText = $('.bigChar', $('.bigBarContainer').first()).text().trim();
+            let id = (_b = ($('a'), (_a = $('.bigChar').attr('href')) === null || _a === void 0 ? void 0 : _a.replace('/Comic/', ''))) !== null && _b !== void 0 ? _b : '';
+            let url = $('img', $('.rightBox')).attr('src');
+            let image = (url === null || url === void 0 ? void 0 : url.includes('http')) ? url : `${READCOMICTO_DOMAIN}${url}`;
+            if (id === undefined) {
+                console.log("Something went wrong, Manga ID Undefined");
+                return [];
             }
-            //Tooltip Selecting 
-            let imageCheerio = cheerio.load((_b = $('td', $(obj)).first().attr('title')) !== null && _b !== void 0 ? _b : '');
-            let image = `${READCOMICTO_DOMAIN}${imageCheerio('img').attr('src')}`;
-            if (typeof id === 'undefined' || typeof image === 'undefined')
-                continue;
-            if (!collectedIds.includes(id)) {
-                mangaTiles.push(createMangaTile({
-                    id: id,
-                    title: createIconText({ text: titleText }),
-                    image: image
-                }));
-                collectedIds.push(id);
+            else {
+                if (!collectedIds.includes(id)) {
+                    mangaTiles.push(createMangaTile({
+                        id: id,
+                        title: createIconText({ text: titleText }),
+                        image: image
+                    }));
+                    collectedIds.push(id);
+                }
+            }
+        }
+        else {
+            for (let obj of $('tr', $('.listing')).toArray()) {
+                let titleText = this.decodeHTMLEntity($('a', $(obj)).first().text().replace('\n', '').trim());
+                let id = (_c = $('a', $(obj)).attr('href')) === null || _c === void 0 ? void 0 : _c.replace('/Comic/', '');
+                if (!titleText || !id) {
+                    continue;
+                }
+                //Tooltip Selecting 
+                let imageCheerio = cheerio.load((_d = $('td', $(obj)).first().attr('title')) !== null && _d !== void 0 ? _d : '');
+                let url = this.decodeHTMLEntity(imageCheerio('img').attr('src'));
+                let image = url.includes('http') ? url : `${READCOMICTO_DOMAIN}${url}`;
+                if (typeof id === 'undefined' || typeof image === 'undefined')
+                    continue;
+                if (!collectedIds.includes(id)) {
+                    mangaTiles.push(createMangaTile({
+                        id: id,
+                        title: createIconText({ text: titleText }),
+                        image: image
+                    }));
+                    collectedIds.push(id);
+                }
             }
         }
         return mangaTiles;
@@ -490,7 +514,7 @@ const paperback_extensions_common_1 = require("paperback-extensions-common");
 const Parser_1 = require("./Parser");
 const READCOMICSTO_DOMAIN = 'https://readcomiconline.to';
 exports.ReadComicsToInfo = {
-    version: '1.0.1',
+    version: '1.0.2',
     name: 'ReadComicsOnlineTo',
     description: 'Extension that pulls western comics from readcomiconline.to',
     author: 'Aurora',
