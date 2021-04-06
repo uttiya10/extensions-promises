@@ -746,6 +746,12 @@ class ReadComicsTo extends paperback_extensions_common_1.Source {
             data: this.urlEncodeObject(data),
         });
     }
+    getCloudflareBypassRequest() {
+        return createRequestObject({
+            url: `${READCOMICSTO_DOMAIN}`,
+            method: 'GET',
+        });
+    }
 }
 exports.ReadComicsTo = ReadComicsTo;
 
