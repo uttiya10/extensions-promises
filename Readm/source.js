@@ -341,7 +341,7 @@ const ReadmParser_1 = require("./ReadmParser");
 const RM_DOMAIN = 'https://readm.org';
 const method = 'GET';
 exports.ReadmInfo = {
-    version: '1.0.4',
+    version: '1.0.5',
     name: 'Readm',
     icon: 'icon.png',
     author: 'Netsky',
@@ -560,7 +560,8 @@ exports.parseMangaDetails = ($, mangaId) => {
         artist: artist,
         tags: tagSections,
         desc: description,
-        hentai: hentai,
+        // hentai: hentai,
+        hentai: false
     });
 };
 exports.parseChapters = ($, mangaId) => {

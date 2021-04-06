@@ -347,7 +347,7 @@ const headers = {
     "content-type": "application/x-www-form-urlencoded"
 };
 exports.MangakakalotInfo = {
-    version: '2.0.2',
+    version: '2.0.4',
     name: 'Mangakakalot',
     icon: 'mangakakalot.com.png',
     author: 'getBoolean',
@@ -626,7 +626,8 @@ exports.parseMangakakalotMangaDetails = ($, mangaId) => {
         follows,
         lastUpdate,
         desc: summary,
-        hentai
+        // hentai
+        hentai: false
     });
 };
 exports.parseMangakakalotChapters = ($, mangaId) => {
