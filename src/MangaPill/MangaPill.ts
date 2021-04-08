@@ -17,7 +17,7 @@ import {Parser,} from './Parser'
 const MANGAPILL_DOMAIN = 'https://www.mangapill.com'
 
 export const MangaPillInfo: SourceInfo = {
-    version: '1.1.4',
+    version: '1.1.5',
     name: 'MangaPill',
     description: 'Extension that pulls manga from mangapill.com. It has a lot of officially translated manga but can sometimes miss manga notifications',
     author: 'GameFuzzy',
@@ -29,7 +29,11 @@ export const MangaPillInfo: SourceInfo = {
         {
             text: "Notifications",
             type: TagType.GREEN
-        }
+        },
+        {
+            text: "Cloudflare",
+            type: TagType.RED
+          }
     ]
 }
 
