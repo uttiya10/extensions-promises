@@ -514,7 +514,7 @@ const paperback_extensions_common_1 = require("paperback-extensions-common");
 const Parser_1 = require("./Parser");
 const READCOMICSTO_DOMAIN = 'https://readcomiconline.to';
 exports.ReadComicsToInfo = {
-    version: '1.0.2',
+    version: '1.0.3',
     name: 'ReadComicsOnlineTo',
     description: 'Extension that pulls western comics from readcomiconline.to',
     author: 'Aurora',
