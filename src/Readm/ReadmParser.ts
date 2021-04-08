@@ -13,13 +13,14 @@ export const parseMangaDetails = ($: CheerioStatic, mangaId: string): Manga => {
   const description = $("p", "div.series-summary-wrapper").text().trim() ?? "";
   const rating = $("div.color-imdb").text().trim() ?? "";
   const rawStatus = $("div.series-genres").text().trim();
+  const views = Number($('div:contains("Views")', "div.media-meta").next().text().replace(/,/g, "") ?? 0);
 
   let hentai = false;
   let arrayTags: Tag[] = [];
   $("a", $("div.ui.list", "div.item")).each((i, tag) => {
     const label = $(tag).text().trim();
     const id = $(tag).attr('href')?.split("category/")[1] ?? "";
-    if (["Adult", "Smut", "Mature"].includes(label)) hentai = true;
+    if (["Adult", "Smut", "Mature"].includes(label)) hentai = true; //These tags don't exist on Readm, but they may be added in the future!
     arrayTags.push({ id: id, label: label });
   });
 
@@ -48,8 +49,9 @@ export const parseMangaDetails = ($: CheerioStatic, mangaId: string): Manga => {
     artist: artist,
     tags: tagSections,
     desc: description,
-    // hentai: hentai,
-    hentai: false
+    views: views,
+    //hentai: hentai,
+    hentai: false //Due to MangaDex being down
   });
 }
 
@@ -204,8 +206,7 @@ export const parseHomeSections = ($: CheerioStatic, sections: HomeSection[], sec
 
 export const generateSearch = (query: SearchRequest): string => {
   let search: string = query.title ?? "";
-  search = search.replace(/im/i, "I'm");
-  return search;
+  return encodeURI(search);
 }
 
 export const parseViewMore = ($: CheerioStatic, homepageSectionId: string): MangaTile[] => {
