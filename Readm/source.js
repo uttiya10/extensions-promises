@@ -341,7 +341,7 @@ const ReadmParser_1 = require("./ReadmParser");
 const RM_DOMAIN = 'https://readm.org';
 const method = 'GET';
 exports.ReadmInfo = {
-    version: '1.0.5',
+    version: '1.0.6',
     name: 'Readm',
     icon: 'icon.png',
     author: 'Netsky',
@@ -515,7 +515,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.isLastPage = exports.parseViewMore = exports.generateSearch = exports.parseHomeSections = exports.parseUpdatedManga = exports.parseTags = exports.parseChapterDetails = exports.parseChapters = exports.parseMangaDetails = void 0;
 const paperback_extensions_common_1 = require("paperback-extensions-common");
 exports.parseMangaDetails = ($, mangaId) => {
-    var _a, _b, _c, _d, _e, _f, _g;
+    var _a, _b, _c, _d, _e, _f, _g, _h;
     const titles = [];
     const title = (_a = $("h1.page-title").text().trim()) !== null && _a !== void 0 ? _a : "";
     titles.push(title);
@@ -527,6 +527,7 @@ exports.parseMangaDetails = ($, mangaId) => {
     const description = (_f = $("p", "div.series-summary-wrapper").text().trim()) !== null && _f !== void 0 ? _f : "";
     const rating = (_g = $("div.color-imdb").text().trim()) !== null && _g !== void 0 ? _g : "";
     const rawStatus = $("div.series-genres").text().trim();
+    const views = Number((_h = $('div:contains("Views")', "div.media-meta").next().text().replace(/,/g, "")) !== null && _h !== void 0 ? _h : 0);
     let hentai = false;
     let arrayTags = [];
     $("a", $("div.ui.list", "div.item")).each((i, tag) => {
@@ -534,7 +535,7 @@ exports.parseMangaDetails = ($, mangaId) => {
         const label = $(tag).text().trim();
         const id = (_b = (_a = $(tag).attr('href')) === null || _a === void 0 ? void 0 : _a.split("category/")[1]) !== null && _b !== void 0 ? _b : "";
         if (["Adult", "Smut", "Mature"].includes(label))
-            hentai = true;
+            hentai = true; //These tags don't exist on Readm, but they may be added in the future!
         arrayTags.push({ id: id, label: label });
     });
     const tagSections = [createTagSection({ id: '0', label: 'genres', tags: arrayTags.map(x => createTag(x)) })];
@@ -560,8 +561,9 @@ exports.parseMangaDetails = ($, mangaId) => {
         artist: artist,
         tags: tagSections,
         desc: description,
-        // hentai: hentai,
-        hentai: false
+        views: views,
+        //hentai: hentai,
+        hentai: false //Due to MangaDex being down
     });
 };
 exports.parseChapters = ($, mangaId) => {
@@ -706,8 +708,7 @@ exports.parseHomeSections = ($, sections, sectionCallback) => {
 exports.generateSearch = (query) => {
     var _a;
     let search = (_a = query.title) !== null && _a !== void 0 ? _a : "";
-    search = search.replace(/im/i, "I'm");
-    return search;
+    return encodeURI(search);
 };
 exports.parseViewMore = ($, homepageSectionId) => {
     var _a, _b, _c, _d, _e, _f, _g, _h;
