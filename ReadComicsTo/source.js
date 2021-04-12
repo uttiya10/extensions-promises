@@ -512,9 +512,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.ReadComicsTo = exports.ReadComicsToInfo = void 0;
 const paperback_extensions_common_1 = require("paperback-extensions-common");
 const Parser_1 = require("./Parser");
-const READCOMICSTO_DOMAIN = 'https://readcomiconline.to';
+const READCOMICSTO_DOMAIN = 'https://readcomiconline.li';
 exports.ReadComicsToInfo = {
-    version: '1.0.3',
+    version: '1.0.4',
     name: 'ReadComicsOnlineTo',
     description: 'Extension that pulls western comics from readcomiconline.to',
     author: 'Aurora',
