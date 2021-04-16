@@ -1,6 +1,6 @@
 import {Chapter, LanguageCode, Manga, MangaStatus, MangaTile, Tag, TagSection} from 'paperback-extensions-common'
 
-const READCOMICTO_DOMAIN = 'https://readcomiconline.to'
+const READCOMICTO_DOMAIN = 'https://readcomiconline.li'
 
 export class Parser {
 
@@ -165,7 +165,7 @@ export class Parser {
       let collectedIds: string[] = []
       for(let obj of $('tr', $('.listing')).toArray()) {
           
-          let titleText = this.decodeHTMLEntity($('a',$(obj)).text().replace('\n','').trim())
+          let titleText = this.decodeHTMLEntity($('a',$(obj)).first().text().replace('\n','').trim())
           let id = $('a',$(obj)).attr('href')?.replace('/Comic/', '')
           if(!titleText || !id) { 
             continue
