@@ -328,7 +328,7 @@ __exportStar(require("./UserForm"), exports);
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Parser = void 0;
 const paperback_extensions_common_1 = require("paperback-extensions-common");
-const READCOMICTO_DOMAIN = 'https://readcomiconline.to';
+const READCOMICTO_DOMAIN = 'https://readcomiconline.li';
 class Parser {
     parseMangaDetails($, mangaId) {
         var _a, _b;
@@ -464,7 +464,7 @@ class Parser {
         let tiles = [];
         let collectedIds = [];
         for (let obj of $('tr', $('.listing')).toArray()) {
-            let titleText = this.decodeHTMLEntity($('a', $(obj)).text().replace('\n', '').trim());
+            let titleText = this.decodeHTMLEntity($('a', $(obj)).first().text().replace('\n', '').trim());
             let id = (_a = $('a', $(obj)).attr('href')) === null || _a === void 0 ? void 0 : _a.replace('/Comic/', '');
             if (!titleText || !id) {
                 continue;
@@ -514,9 +514,9 @@ const paperback_extensions_common_1 = require("paperback-extensions-common");
 const Parser_1 = require("./Parser");
 const READCOMICSTO_DOMAIN = 'https://readcomiconline.li';
 exports.ReadComicsToInfo = {
-    version: '1.0.4',
-    name: 'ReadComicsOnlineTo',
-    description: 'Extension that pulls western comics from readcomiconline.to',
+    version: '1.0.5',
+    name: 'ReadComicsOnlineLi',
+    description: 'Extension that pulls western comics from readcomiconline.li',
     author: 'Aurora',
     authorWebsite: 'https://github.com/Aur0raN',
     icon: "logo.png",
@@ -528,7 +528,7 @@ class ReadComicsTo extends paperback_extensions_common_1.Source {
     constructor() {
         super(...arguments);
         this.requestManager = createRequestManager({
-            requestsPerSecond: 2.5,
+            requestsPerSecond: 1.5,
             requestTimeout: 15000,
         });
         this.baseUrl = READCOMICSTO_DOMAIN;
