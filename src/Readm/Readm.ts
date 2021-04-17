@@ -15,11 +15,10 @@ import {
 import { parseUpdatedManga, generateSearch, parseChapterDetails, isLastPage, parseTags, parseChapters, parseHomeSections, parseMangaDetails, parseViewMore, UpdatedManga } from "./ReadmParser"
 
 const RM_DOMAIN = 'https://readm.org'
-
 const method = 'GET'
 
 export const ReadmInfo: SourceInfo = {
-  version: '1.0.6',
+  version: '1.0.8',
   name: 'Readm',
   icon: 'icon.png',
   author: 'Netsky',
@@ -43,7 +42,7 @@ export class Readm extends Source {
       url: `${RM_DOMAIN}/manga/`,
       method,
       param: mangaId,
-    })
+    });
 
     const response = await this.requestManager.schedule(request, 1);
     const $ = this.cheerio.load(response.data);
@@ -55,7 +54,7 @@ export class Readm extends Source {
       url: `${RM_DOMAIN}/manga/`,
       method,
       param: mangaId,
-    })
+    });
 
     const response = await this.requestManager.schedule(request, 1);
     const $ = this.cheerio.load(response.data);
@@ -65,10 +64,9 @@ export class Readm extends Source {
   async getChapterDetails(mangaId: string, chapterId: string): Promise<ChapterDetails> {
     const request = createRequestObject({
       url: `${RM_DOMAIN}/manga/${mangaId}/${chapterId}`,
-      method: "GET",
+      method: method,
     });
 
-    this.getTags()
     const response = await this.requestManager.schedule(request, 1);
     const $ = this.cheerio.load(response.data, { xmlMode: false });
     return parseChapterDetails($, mangaId, chapterId);
@@ -78,7 +76,7 @@ export class Readm extends Source {
     const request = createRequestObject({
       url: `${RM_DOMAIN}`,
       method,
-    })
+    });
 
     const response = await this.requestManager.schedule(request, 1);
     const $ = this.cheerio.load(response.data);
@@ -96,7 +94,7 @@ export class Readm extends Source {
       const request = createRequestObject({
         url: `${RM_DOMAIN}/latest-releases/${page++}`,
         method,
-      })
+      });
 
       const response = await this.requestManager.schedule(request, 1)
       const $ = this.cheerio.load(response.data)
@@ -112,10 +110,10 @@ export class Readm extends Source {
   }
 
   async getHomePageSections(sectionCallback: (section: HomeSection) => void): Promise<void> {
-    let section1 = createHomeSection({ id: 'hot_update', title: 'Hot Manga Updates' });
-    let section2 = createHomeSection({ id: 'hot_manga', title: 'Popular Manga', view_more: true });
-    let section3 = createHomeSection({ id: 'latest_updates', title: 'Latest Updates', view_more: true });
-    let section4 = createHomeSection({ id: 'new_manga', title: 'Recently Added Manga' });
+    const section1 = createHomeSection({ id: 'hot_update', title: 'Hot Manga Updates' });
+    const section2 = createHomeSection({ id: 'hot_manga', title: 'Popular Manga', view_more: true });
+    const section3 = createHomeSection({ id: 'latest_updates', title: 'Latest Updates', view_more: true });
+    const section4 = createHomeSection({ id: 'new_manga', title: 'Recently Added Manga' });
     const sections = [section1, section2, section3, section4];
     const request = createRequestObject({
       url: RM_DOMAIN,
@@ -145,7 +143,7 @@ export class Readm extends Source {
       url: `${RM_DOMAIN}`,
       method,
       param,
-    })
+    });
 
     const response = await this.requestManager.schedule(request, 1);
     const $ = this.cheerio.load(response.data);
@@ -177,7 +175,7 @@ export class Readm extends Source {
 
     for (const m of data.manga) {
       const id = m.url.split("/manga/")[1];
-      const image = "https://readm.org" + m.image;
+      const image = RM_DOMAIN + m.image;
       const title = m.title;
       manga.push(createMangaTile({
         id,
