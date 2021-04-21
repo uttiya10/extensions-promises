@@ -114,18 +114,11 @@ export class Parser {
             let chapterId = chapterTile.attr('href')?.replace(`/chapter/`, '')
             let chapGroup = $(chapterTile).text().trim().split('\n').pop()?.trim()
             let chapName = $('span', $(chapterTile)).first().text().replace(':', '').trim()
-            if(chapName == chapGroup) chapName = ''
-            let chapter = $('b', chapterTile).text().toLowerCase()?.split('chapter')
-            let chapNum = chapter[1]?.trim()
-            let volume = Number(chapter[0]?.replace('volume', '').trim())
-            // NaN check
-            if (isNaN(Number(chapNum))) {
-                chapNum = `${chapNum.replace(/^\D+/, '') ?? '0'}`.split(/^\D+/)[0]
-                if (isNaN(Number(chapNum))) {
-                    chapNum = '0'
-                    chapName = $(chapterTile).text().trim().split('\n')[0]
-                }
-            }
+            if (chapName == chapGroup) chapName = ''
+            let chapter = $('b', chapterTile).text().toLowerCase()
+            let chapNum = Number((/(\d+)/).test(chapter) ? chapter.match(/(\d+)/)![0] : 0)
+            let volume = Number(chapter?.split('chapter')[0]?.replace('volume', '').trim())
+            
             let language = $('.emoji').attr('data-lang') ?? 'gb'
             let time = source.convertTime($('i', $(obj)).text())
             if (typeof chapterId === 'undefined') continue
