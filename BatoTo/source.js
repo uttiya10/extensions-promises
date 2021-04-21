@@ -30325,7 +30325,7 @@ const paperback_extensions_common_1 = require("paperback-extensions-common");
 const Parser_1 = require("./Parser");
 const BATOTO_DOMAIN = 'https://bato.to';
 exports.BatoToInfo = {
-    version: '1.1.6',
+    version: '1.1.7',
     name: 'Bato.To',
     description: 'Extension that pulls western comics from bato.to',
     author: 'GameFuzzy',
@@ -30724,7 +30724,7 @@ class Parser {
         });
     }
     parseChapterList($, mangaId, source) {
-        var _a, _b, _c, _d, _e, _f, _g, _h;
+        var _a, _b, _c, _d, _e;
         let chapters = [];
         for (let obj of $('.item', $('.main')).toArray()) {
             let chapterTile = $('a', $(obj));
@@ -30733,18 +30733,10 @@ class Parser {
             let chapName = $('span', $(chapterTile)).first().text().replace(':', '').trim();
             if (chapName == chapGroup)
                 chapName = '';
-            let chapter = (_c = $('b', chapterTile).text().toLowerCase()) === null || _c === void 0 ? void 0 : _c.split('chapter');
-            let chapNum = (_d = chapter[1]) === null || _d === void 0 ? void 0 : _d.trim();
-            let volume = Number((_e = chapter[0]) === null || _e === void 0 ? void 0 : _e.replace('volume', '').trim());
-            // NaN check
-            if (isNaN(Number(chapNum))) {
-                chapNum = `${(_f = chapNum.replace(/^\D+/, '')) !== null && _f !== void 0 ? _f : '0'}`.split(/^\D+/)[0];
-                if (isNaN(Number(chapNum))) {
-                    chapNum = '0';
-                    chapName = $(chapterTile).text().trim().split('\n')[0];
-                }
-            }
-            let language = (_g = $('.emoji').attr('data-lang')) !== null && _g !== void 0 ? _g : 'gb';
+            let chapter = $('b', chapterTile).text().toLowerCase();
+            let chapNum = Number((/(\d+)/).test(chapter) ? chapter.match(/(\d+)/)[0] : 0);
+            let volume = Number((_c = chapter === null || chapter === void 0 ? void 0 : chapter.split('chapter')[0]) === null || _c === void 0 ? void 0 : _c.replace('volume', '').trim());
+            let language = (_d = $('.emoji').attr('data-lang')) !== null && _d !== void 0 ? _d : 'gb';
             let time = source.convertTime($('i', $(obj)).text());
             if (typeof chapterId === 'undefined')
                 continue;
@@ -30754,7 +30746,7 @@ class Parser {
                 volume: Number.isNaN(volume) ? 0 : volume,
                 chapNum: Number(chapNum),
                 group: this.decodeHTMLEntity(chapGroup !== null && chapGroup !== void 0 ? chapGroup : ''),
-                langCode: (_h = Languages_1.reverseLangCode[language]) !== null && _h !== void 0 ? _h : Languages_1.reverseLangCode['_unknown'],
+                langCode: (_e = Languages_1.reverseLangCode[language]) !== null && _e !== void 0 ? _e : Languages_1.reverseLangCode['_unknown'],
                 name: this.decodeHTMLEntity(chapName),
                 time: time
             }));
