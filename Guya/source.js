@@ -488,11 +488,11 @@ class Guya extends paperback_extensions_common_1.Source {
             let result = typeof data.data === "string" ? JSON.parse(data.data) : data.data;
             let foundIds = [];
             for (let series in result) {
-                let seriesDetails = result[series];
-                let seriesUpdated = new Date(seriesDetails["last_updated"] * 1000);
-                if (seriesUpdated >= time &&
-                    ids.includes(series)) {
-                    foundIds.push(series);
+                const seriesDetails = result[series];
+                const seriesUpdated = new Date(seriesDetails["last_updated"] * 1000);
+                const id = seriesDetails["slug"];
+                if (seriesUpdated >= time && ids.includes(id)) {
+                    foundIds.push(id);
                 }
             }
             mangaUpdatesFoundCallback(createMangaUpdates({ ids: foundIds }));
