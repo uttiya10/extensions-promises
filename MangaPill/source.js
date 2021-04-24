@@ -428,7 +428,10 @@ class MangaPill extends paperback_extensions_common_1.Source {
         var _a, _b, _c, _d;
         return __awaiter(this, void 0, void 0, function* () {
             let page = (_a = metadata === null || metadata === void 0 ? void 0 : metadata.page) !== null && _a !== void 0 ? _a : 1;
-            let genres = '&genre=' + ((_b = query.includeGenre) !== null && _b !== void 0 ? _b : []).join('&genre=');
+            let genres = ((_b = query.includeGenre) !== null && _b !== void 0 ? _b : []).join('&genre=');
+            if (genres != '') {
+                genres = '&genre=' + genres;
+            }
             let format = '&type=' + ((_c = query.includeFormat) !== null && _c !== void 0 ? _c : '');
             let status;
             switch (query.status) {
@@ -444,7 +447,7 @@ class MangaPill extends paperback_extensions_common_1.Source {
             let request = createRequestObject({
                 url: `${MANGAPILL_DOMAIN}/search`,
                 method: "GET",
-                param: `?page=${page}&title=${encodeURIComponent((_d = query.title) !== null && _d !== void 0 ? _d : '')}${format}${status}${genres}`
+                param: `?q=${encodeURIComponent((_d = query.title) !== null && _d !== void 0 ? _d : '')}${format}${status}${genres}&page=${page}`
             });
             let data = yield this.requestManager.schedule(request, 1);
             let $ = this.cheerio.load(data.data);
@@ -490,7 +493,7 @@ class MangaPill extends paperback_extensions_common_1.Source {
                 },
                 {
                     request: createRequestObject({
-                        url: `${MANGAPILL_DOMAIN}/search?title=&type=&status=1`,
+                        url: `${MANGAPILL_DOMAIN}/search?q=&type=&status=`,
                         method: 'GET'
                     }),
                     section: createHomeSection({
@@ -534,7 +537,7 @@ class MangaPill extends paperback_extensions_common_1.Source {
                 }
                 case '2': {
                     let request = createRequestObject({
-                        url: `${MANGAPILL_DOMAIN}/search?title=&type=&status=1&page=${page}`,
+                        url: `${MANGAPILL_DOMAIN}/search?q=&type=&status=&page=${page}`,
                         method: 'GET'
                     });
                     let data = yield this.requestManager.schedule(request, 1);
@@ -577,7 +580,7 @@ class Parser {
         if (altTitle != 'Title') {
             titles.push(altTitle);
         }
-        let image = $('.lazy').attr('src');
+        let image = $('.lazy').attr('data-src');
         let summary = $('p', $('.my-3', descBox)).text().trim();
         let status = paperback_extensions_common_1.MangaStatus.ONGOING, released, rating = 0;
         let tagArray0 = [];
@@ -691,13 +694,13 @@ class Parser {
         return pages;
     }
     filterUpdatedManga($, time, ids) {
-        var _a, _b;
+        var _a, _b, _c;
         let foundIds = [];
         let passedReferenceTime = false;
         for (let item of $('.font-medium.text-color-text-primary').toArray()) {
             let href = ((_a = $(item).attr('href')) !== null && _a !== void 0 ? _a : '');
             let id = href.split('-')[0].split('/').pop() + '/' + ((_b = href.split('/').pop()) === null || _b === void 0 ? void 0 : _b.split('-chapter')[0].trim());
-            let mangaTime = new Date(time);
+            let mangaTime = new Date(Date.parse((_c = $(item).parent().next().text()) !== null && _c !== void 0 ? _c : 0));
             passedReferenceTime = mangaTime <= time;
             if (!passedReferenceTime) {
                 if (ids.includes(id)) {
