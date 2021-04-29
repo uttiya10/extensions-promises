@@ -338,10 +338,10 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.MangaPark = exports.MangaParkInfo = void 0;
 const paperback_extensions_common_1 = require("paperback-extensions-common");
 const MangaParkParser_1 = require("./MangaParkParser");
-const MP_DOMAIN = 'https://mangapark.net';
+const MP_DOMAIN = 'https://v2.mangapark.net';
 const method = 'GET';
 exports.MangaParkInfo = {
-    version: '2.0.1',
+    version: '2.0.2',
     name: 'MangaPark',
     icon: 'icon.png',
     author: 'Daniel Kovalevich',
@@ -418,9 +418,9 @@ class MangaPark extends paperback_extensions_common_1.Source {
                 const $ = this.cheerio.load(response.data);
                 updatedManga = MangaParkParser_1.parseUpdatedManga($, time, ids);
                 if (updatedManga.ids.length > 0) {
-                    mangaUpdatesFoundCallback({
+                    mangaUpdatesFoundCallback(createMangaUpdates({
                         ids: updatedManga.ids
-                    });
+                    }));
                 }
             }
         });
