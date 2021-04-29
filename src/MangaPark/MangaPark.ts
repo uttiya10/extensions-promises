@@ -13,11 +13,11 @@ import {
 from "paperback-extensions-common"
 import { generateSearch, parseChapterDetails, parseChapters, parseHomeSections, parseMangaDetails, parseSearch, parseTags, parseUpdatedManga,  parseViewMore,  UpdatedManga } from "./MangaParkParser"
 
-const MP_DOMAIN = 'https://mangapark.net'
+const MP_DOMAIN = 'https://v2.mangapark.net'
 const method = 'GET'
 
 export const MangaParkInfo: SourceInfo = {
-	version: '2.0.1',
+	version: '2.0.2',
 	name: 'MangaPark',
 	icon: 'icon.png',
 	author: 'Daniel Kovalevich',
@@ -96,9 +96,9 @@ export class MangaPark extends Source {
 
 			updatedManga = parseUpdatedManga($, time, ids)
 			if (updatedManga.ids.length > 0) {
-				mangaUpdatesFoundCallback({
+				mangaUpdatesFoundCallback(createMangaUpdates({
 					ids: updatedManga.ids
-				})
+				  }));
 			}
 		}
 
