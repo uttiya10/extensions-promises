@@ -11,40 +11,21 @@ import {
   LanguageCode,
   TagType,
   MangaUpdates,
-  Request
+  MangaStatus,
+  MangaTile,
+  Tag
 } from 'paperback-extensions-common'
 
-import {
-  Parser,
-} from './Parser'
-
-let IS_BETA: boolean
-try {
-  // `IS_PUBLIC` is not defined at bundle time
-  // this will throw an error at bundle time
-  IS_BETA = IS_PUBLIC === 'false'
-} catch {
-  IS_BETA = false
-}
-
-// Paperback has a beta server that sometimes has changes specific
-// to the beta/alpha version of the app
-const PAPERBACK_API = `https://${IS_BETA ? 'md-cacher.herokuapp.com' : 'api.paperback.moe'}`
 const MANGADEX_DOMAIN = 'https://mangadex.org'
-const MANGADEX_API_V2 = 'https://api.mangadex.org/v2'
-
-const MANGA_ENDPOINT = PAPERBACK_API + '/manga'
-const CHAPTER_LIST_ENDPOINT = MANGADEX_API_V2 + '/manga'
-const CHAPTER_DETAILS_ENDPOINT = MANGADEX_API_V2 + '/chapter'
-const SEARCH_ENDPOINT = PAPERBACK_API + '/search'
+const MANGADEX_API = 'https://api.mangadex.org'
 
 export const MangaDexInfo: SourceInfo = {
-  author: 'Neko',
-  description: 'Overwrites SafeDex,unlocks all mangas MangaDex has to offer and loads slightly faster. supports notifications',
+  author: 'nar1n',
+  description: 'Extension that pulls manga from MangaDex"',
   icon: 'icon.png',
-  name: 'MangaDex Unlocked',
-  version: '2.0.9',
-  authorWebsite: 'https://github.com/Pogogo007/extensions-main-promises',
+  name: 'MangaDex',
+  version: '1.0.0',
+  authorWebsite: 'https://github.com/nar1n',
   websiteBaseURL: MANGADEX_DOMAIN,
   hentaiSource: false,
   language: LanguageCode.ENGLISH,
@@ -53,14 +34,60 @@ export const MangaDexInfo: SourceInfo = {
       text: 'Recommended',
       type: TagType.BLUE,
     },
+    {
+      text: "Notifications",
+      type: TagType.GREEN
+    }
   ],
 }
 
 export class MangaDex extends Source {
-  parser = new Parser()
+
+  languageMapping: any = {
+    'en': 'gb',
+    'pt-br': 'pt',
+    'ru': 'ru',
+    'fr': 'fr',
+    'es-la': 'es',
+    'pl': 'pl',
+    'tr': 'tr',
+    'it': 'it',
+    'es': 'es',
+    'id': 'id',
+    'vi': 'vn',
+    'hu': 'hu',
+    'zh': 'cn',
+    // 'ar': '', // Arabic
+    'de': 'de',
+    'zh-hk': 'hk',
+    // 'ca': '', // Catalan
+    'th': 'th',
+    'bg': 'bg',
+    // 'fa': '', // Faroese
+    'uk': 'ua',
+    'mn': 'mn',
+    // 'he': '', // Hebrew
+    'ro': 'ro',
+    'ms': 'my',
+    // 'tl': '', // Tagalog
+    'ja': 'jp',
+    'ko': 'kr',
+    // 'hi': '', // Hindi
+    // 'my': '', // Malaysian
+    'cs': 'cz',
+    'pt': 'pt',
+    'nl': 'nl',
+    // 'sv': '', // Swedish
+    // 'bn': '', // Bengali
+    'no': 'no',
+    'lt': 'lt',
+    // 'sr': '', // Serbian
+    'da': 'dk',
+    'fi': 'fi',
+  }
 
   requestManager = createRequestManager({
-    requestsPerSecond: 1,
+    requestsPerSecond: 4,
     requestTimeout: 15000,
   })
 
@@ -68,107 +95,439 @@ export class MangaDex extends Source {
     return `${MANGADEX_DOMAIN}/manga/${mangaId}`
   }
 
-  async getMangaDetails(mangaId: string): Promise<Manga> {
-    const request = createRequestObject({
-      url: MANGA_ENDPOINT,
-      method: 'POST',
-      headers: {
-        'content-type': 'application/json',
-      },
-      data: JSON.stringify({
-        id: [parseInt(mangaId)],
-        bypassFilter: true,
-      }),
-    })
+  async getMangaUUIDs(numericIds: string[], type: string = 'manga'): Promise<{[id: string]: string}> {
+    const length = numericIds.length
+    let offset = 0
+    const UUIDsDict:{[id: string]: string} = {}
 
-    const response = await this.requestManager.schedule(request, 1)
-    const json = JSON.parse(response.data) as any
-
-    return this.parser.parseMangaDetails(json)[0]
-  }
-
-  async getBatchMangaDetails(mangaIds: string[]): Promise<Manga[]> {
-    let batchedIds: string[]
-
-    const fetchedDetails: Manga[] = []
-
-    // Get manga in 50 manga batches
-    const chunk = 50
-    for (let i = 0; i < mangaIds.length; i += chunk) {
-      batchedIds = mangaIds.slice(i, i + chunk)
-
+    while (true) {
       const request = createRequestObject({
-        url: MANGA_ENDPOINT,
+        url: `${MANGADEX_API}/legacy/mapping`,
         method: 'POST',
-        headers: {
-          'content-type': 'application/json',
-        },
-        data: JSON.stringify({
-          id: batchedIds.map(x => parseInt(x)),
-          bypassFilter: true,
-        }),
+        headers: {'content-type': 'application/json'},
+        data: {
+          'type': 'manga',
+          'ids': numericIds.slice(offset, offset + 500).map(x => Number(x))
+        }
       })
-
-      // eslint-disable-next-line no-await-in-loop
+      offset += 500
+    
       const response = await this.requestManager.schedule(request, 1)
-      const json = JSON.parse(response.data) as any
+      const json = typeof response.data === "string" ? JSON.parse(response.data) : response.data
 
-      for (const manga of this.parser.parseMangaDetails(json)) {
-        fetchedDetails.push(manga)
+      for (const mapping of json) {
+        UUIDsDict[mapping.data.attributes.legacyId] = mapping.data.attributes.newId
+      }
+
+      if (offset >= length) {
+        break
       }
     }
 
-    console.log(fetchedDetails)
-    return fetchedDetails ?? []
+    return UUIDsDict
+  }
+
+  async getAuthors(authorIds: string[]): Promise<{[id: string]: string}> {
+    let url = `${MANGADEX_API}/author/?limit=100`
+    let index = 0
+    for (const author of authorIds) {
+      url += `&ids[${index}]=${author}`
+      index += 1
+    }
+
+    const request = createRequestObject({
+      url,
+      method: 'GET',
+    })
+
+    const response = await this.requestManager.schedule(request, 1)
+    const json = typeof response.data === "string" ? JSON.parse(response.data) : response.data
+
+    let authorsDict:{[id: string]: string} = {}
+    for (const entry of json.results) {
+      authorsDict[entry.data.id] = entry.data.attributes.name
+    }
+
+    return authorsDict
+  }
+
+  async getGroups(groupIds: string[]): Promise<{[id: string]: string}> {
+    const length = groupIds.length
+    let offset = 0
+    let groupsDict:{[id: string]: string} = {}
+
+    while (true) {
+      let url = `${MANGADEX_API}/group/?limit=100&offset=${offset}`
+      let index = 0
+      for (const group of groupIds.slice(offset, offset + 100)) {
+        url += `&ids[${index}]=${group}`
+        index += 1
+      }
+      offset += 100
+
+      const request = createRequestObject({
+        url,
+        method: 'GET',
+      })
+
+      const response = await this.requestManager.schedule(request, 1)
+      const json = typeof response.data === "string" ? JSON.parse(response.data) : response.data
+
+      for (const entry of json.results) {
+        groupsDict[entry.data.id] = entry.data.attributes.name
+      }
+
+      if (offset >= length) {
+        break
+      }
+    }
+
+    return groupsDict
+  }
+
+  async getMDHNodeURL(chapterId: string): Promise<string> {
+    const request = createRequestObject({
+      url: `${MANGADEX_API}/at-home/server/${chapterId}`,
+      method: 'GET',
+    })
+    
+    const response = await this.requestManager.schedule(request, 1)
+    const json = typeof response.data === "string" ? JSON.parse(response.data) : response.data
+
+    return json.baseUrl
+  }
+
+  async getImageLink(links: { [identifier: string]: number }, extraResults = false): Promise<string>{    
+    /*
+        Return a cover url determined using one of the providers passed in links
+        extraResults: boolean, if the function should use extra requests to get a cover url
+        
+        Existing providers
+          'mu' => MangaUpdates 
+          'mal' => MyAnimeList
+          'nu' => NovelUpdates
+          'raw' => Raw
+          'engtl' => Official Eng
+          'cdj' => CDJapan
+          'amz' => Amazon.co.jp
+          'ebj' => eBookJapan
+          'bw' => Bookwalker
+          'al' => AniList
+          'kt' => Kitsu
+          'ap' => Anime-Planet 
+          'dj' => Doujinshi.org
+        
+        Implemented providers: Kitsu, MyAnimeList, AniList, MangaUpdates, Anime-Planet
+     */
+
+    if (links === null) {
+      // Default cover
+      return 'https://i.imgur.com/6TrIues.jpg'
+    }
+    
+    // Kitsu
+    if (links.kt !== undefined) {
+      // Available sizes: tiny, small, medium, large
+      return `https://media.kitsu.io/manga/poster_images/${links.kt}/small.jpg`
+    }
+    
+    if (extraResults) {
+      // MyAnimeList
+      if (links.mal !== undefined) {
+        // We use Jikan API to get the image link
+        // Doc: https://jikan.docs.apiary.io/#reference/0/manga
+        // Available sizes: small, large
+
+
+        const request = createRequestObject({
+          url: `https://api.jikan.moe/v3/manga/${links.mal}/pictures`,
+          method: 'GET',
+        })
+        const response = await this.requestManager.schedule(request, 1)
+        const data = typeof response.data === "string" ? JSON.parse(response.data) : response.data
+
+        if (data.pictures !== undefined) {
+          if (data.pictures.length > 0) {
+            return data.pictures[0].small
+          }
+        }
+      }
+
+      // AniList
+      if (links.al !== undefined) {
+        // Available sizes: medium, large, extraLarge
+        // Doc: https://anilist.gitbook.io/anilist-apiv2-docs/overview/graphql/getting-started
+
+        const query = "query ($id: Int) { Media (id: $id, type: MANGA) {coverImage {large}}}"
+
+        var variables = {
+          id: links.al
+        };
+          
+        const request = createRequestObject({
+          url: 'https://graphql.anilist.co',
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+          },
+          data: JSON.stringify({
+              query: query,
+              variables: variables
+          })
+        })
+        
+        const response = await this.requestManager.schedule(request, 1)
+        const data = typeof response.data === "string" ? JSON.parse(response.data) : response.data
+        
+        // data has the format {"data": {"Media": {"coverImage": {"large": "URL"}}}}
+        return data.data.Media.coverImage.large
+      }
+
+      // MangaUpdates
+      if (links.mu !== undefined) {
+        // MangaUpdates does not have an API
+        const request = createRequestObject({
+          url: `https://www.mangaupdates.com/series.html?id=${links.mu}`,
+          method: 'GET',
+        })
+        const response = await this.requestManager.schedule(request, 1)
+        const $ = this.cheerio.load(response.data)
+
+        const url = $('.sContent .img-fluid').attr('src')
+
+        if (url !== undefined){
+          return url
+        }
+      }
+
+      // Anime-Planet
+      if (links.ap !== undefined) {
+        // Anime-Planet does not have an API
+        const request = createRequestObject({
+          url: `https://www.anime-planet.com/manga/${links.ap}`,
+          method: 'GET',
+        })
+        const response = await this.requestManager.schedule(request, 1)
+        const $ = this.cheerio.load(response.data)
+
+        const path = $('.screenshots').attr('src')
+
+        if (path !== undefined){
+          return `https://www.anime-planet.com${path}`
+        }
+      }
+    }
+
+    // Default cover
+    return 'https://i.imgur.com/6TrIues.jpg'
+  }
+
+
+  async getMangaDetails(mangaId: string): Promise<Manga> {
+    let newMangaId: string
+    if (!mangaId.includes('-')) {
+      // Legacy Id
+      const UUIDsDict = await this.getMangaUUIDs([mangaId])
+      newMangaId = UUIDsDict[mangaId]
+    } else {
+      newMangaId = mangaId
+    }
+
+    const request = createRequestObject({
+      url: `${MANGADEX_API}/manga/${newMangaId}`,
+      method: 'GET',
+    })
+    
+    const response = await this.requestManager.schedule(request, 1)
+    const json = typeof response.data === "string" ? JSON.parse(response.data) : response.data
+
+    const mangaDetails = json.data.attributes
+    const titles = [mangaDetails.title[Object.keys(mangaDetails.title)[0]]].concat(mangaDetails.altTitles.map((x: any)  => this.decodeHTMLEntity(x[Object.keys(x)[0]])))
+    const desc = this.decodeHTMLEntity(mangaDetails.description.en).replace(/\[\/{0,1}[bus]\]/g, '')  // Get rid of BBcode tags
+    
+
+    let status = MangaStatus.COMPLETED
+    if (mangaDetails.status == 'ongoing') {
+      status = MangaStatus.ONGOING
+    }
+    const tags: Tag[] = []
+    for (const tag of mangaDetails.tags) {
+      const tagName: {[index: string]: string} = tag.attributes.name
+      tags.push(createTag({
+        id: tag.id,
+        label: Object.keys(tagName).map(keys => tagName[keys])[0]
+      }))
+    }
+    
+    let author = json.relationships.filter((x: any) => x.type == 'author').map((x: any) => x.id)
+    let artist = json.relationships.filter((x: any) => x.type == 'artist').map((x: any) => x.id)
+
+    const authors = author.concat(artist)
+    if (authors.length != 0) {
+      const authorsDict = await this.getAuthors(authors)
+      author = author.map((x: any) => this.decodeHTMLEntity(authorsDict[x])).join(', ')
+      artist = artist.map((x: any) => this.decodeHTMLEntity(authorsDict[x])).join(', ')
+    }
+
+    return createManga({
+      id: mangaId,
+      titles,
+      image: await this.getImageLink(mangaDetails.links, true),
+      author,
+      artist,
+      desc,
+      rating: 5,
+      status,
+      tags: [createTagSection({
+        id: "tags",
+        label: "Tags",
+        tags: tags
+      })]
+    })
   }
 
   async getChapters(mangaId: string): Promise<Chapter[]> {
-    const request = createRequestObject({
-      url: `${CHAPTER_LIST_ENDPOINT}/${mangaId}/chapters`,
+    let newMangaId: string
+    if (!mangaId.includes('-')) {
+      // Legacy Id
+      const UUIDsDict = await this.getMangaUUIDs([mangaId])
+      newMangaId = UUIDsDict[mangaId]
+    } else {
+      newMangaId = mangaId
+    }
+
+    let chaptersUnparsed: any[] = []
+    let offset = 0
+    let groupIds: string[] = []
+
+    while (true) {
+      const request = createRequestObject({
+      url: `${MANGADEX_API}/manga/${newMangaId}/feed?limit=500&offset=${offset}`,
       method: 'GET',
+      })
+      const response = await this.requestManager.schedule(request, 1)
+      const json = typeof response.data === "string" ? JSON.parse(response.data) : response.data
+      offset += 500
+
+      for (const chapter of json.results) {
+        const chapterId = chapter.data.id
+        const chapterDetails = chapter.data.attributes
+        const name =  this.decodeHTMLEntity(chapterDetails.title)
+        const chapNum = Number(chapterDetails?.chapter)
+        const volume = Number(chapterDetails?.volume)
+        let langCode: string = chapterDetails.translatedLanguage
+        if (Object.keys(this.languageMapping).includes(langCode)) {
+          langCode = this.languageMapping[chapterDetails.translatedLanguage]
+        } else {
+          langCode = '_unkown'
+        }
+
+        const time = new Date(chapterDetails.publishAt)
+
+        let groups = chapter.relationships.filter((x: any) => x.type == 'scanlation_group').map((x: any) => x.id)
+        for (const groupId of groups) {
+          if (!groupIds.includes(groupId)) {
+            groupIds.push(groupId)
+          }
+        }
+
+        chaptersUnparsed.push({
+          id: chapterId,
+          mangaId: mangaId,
+          name,
+          chapNum,
+          volume,
+          langCode,
+          groups,
+          time
+        })
+      }
+
+      if (json.total <= offset) {
+        break
+      }
+    }
+    const groupDict = await this.getGroups(groupIds)
+    const chapters: Chapter[] = chaptersUnparsed.map((x: any) => {
+      x.group = x.groups.map((x: any) => this.decodeHTMLEntity(groupDict[x])).join(', ') + ''
+      delete x.groups
+      return createChapter(x)
     })
 
-    const response = await this.requestManager.schedule(request, 1)
-    const json = JSON.parse(response.data) as any
-
-    return this.parser.parseChapterList(mangaId, json)
+    return chapters
   }
 
-  async getChapterDetails(_mangaId: string, chapterId: string): Promise<ChapterDetails> {
+  async getChapterDetails(mangaId: string, chapterId: string): Promise<ChapterDetails> {
+    if (!chapterId.includes('-')) {
+      // Numeric ID
+      throw new Error('OLD ID: PLEASE REFRESH AND CLEAR ORPHANED CHAPTERS')
+    }
+
+    const serverUrl = await this.getMDHNodeURL(chapterId)
+
     const request = createRequestObject({
-      url: `${CHAPTER_DETAILS_ENDPOINT}/${chapterId}`,
+      url: `${MANGADEX_API}/chapter/${chapterId}`,
       method: 'GET',
     })
 
     const response = await this.requestManager.schedule(request, 1)
-    const json = JSON.parse(response.data) as any
+    const json = typeof response.data === "string" ? JSON.parse(response.data) : response.data
 
-    return this.parser.parseChapterDetails(json.data)
+    const chapterDetails = json.data.attributes
+    const pages = chapterDetails.data.map(
+      (x: string) => `${serverUrl}/data/${chapterDetails.hash}/${x}`
+    )
+
+    return createChapterDetails({
+      id: chapterId,
+      mangaId: mangaId,
+      pages,
+      longStrip: false
+    })
   }
 
   async searchRequest(query: SearchRequest, metadata: any): Promise<PagedResults> {
-    const page = metadata?.page ?? 1
-    const items = metadata?.items ?? 50
+    let offset: number = metadata?.offset ?? 0
+    let results: MangaTile[] = []
 
-    const request = this.constructSearchRequest(query, page, items)
+    const request = createRequestObject({
+      url: `${MANGADEX_API}/manga?title=${encodeURIComponent(query.title ?? '')}&limit=100&offset=${offset}`,
+      method: 'GET',
+    })
 
     const response = await this.requestManager.schedule(request, 1)
-    const json = JSON.parse(response.data) as any
-    const results = this.parser.parseSearchResults(json)
+    if (response.status != 200) {
+      return createPagedResults({results})
+    }
+
+    const json = typeof response.data === "string" ? JSON.parse(response.data) : response.data
+
+    for (const manga of json.results) {
+      const mangaId = manga.data.id
+      const mangaDetails = manga.data.attributes
+      const title = this.decodeHTMLEntity(mangaDetails.title[Object.keys(mangaDetails.title)[0]])
+
+      results.push(createMangaTile({
+        id: mangaId,
+        title: createIconText({text: title}),
+        image: await this.getImageLink(mangaDetails.links)
+      }))
+    }
 
     return createPagedResults({
       results,
-      metadata: {
-        page: page,
-        items: items,
-      },
+      metadata: {offset: offset + 100}
     })
   }
 
   async getHomePageSections(sectionCallback: (section: HomeSection) => void): Promise<void> {
     const sections = [
       {
-        request: this.constructSearchRequest({}, 1, 10),
+        request: createRequestObject({
+          url: `${MANGADEX_API}/manga?limit=20`,
+          method: 'GET',
+        }),
         section: createHomeSection({
           id: 'recently_updated',
           title: 'RECENTLY UPDATED TITLES',
@@ -176,9 +535,10 @@ export class MangaDex extends Source {
         }),
       },
       {
-        request: this.constructSearchRequest({
-          includeDemographic: ['1'],
-        }, 1, 10),
+        request: createRequestObject({
+          url: `${MANGADEX_API}/manga?limit=20&publicationDemographic[0]=shounen`,
+          method: 'GET',
+        }),
         section: createHomeSection({
           id: 'shounen',
           title: 'UPDATED SHOUNEN TITLES',
@@ -186,9 +546,10 @@ export class MangaDex extends Source {
         }),
       },
       {
-        request: this.constructSearchRequest({
-          includeGenre: ['2'],
-        }, 1, 10),
+        request: createRequestObject({
+          url: `${MANGADEX_API}/manga?limit=20&includedTags[0]=391b0423-d847-456f-aff0-8b0cfc03066b`,
+          method: 'GET',
+        }),
         section: createHomeSection({
           id: 'action',
           title: 'UPDATED ACTION TITLES',
@@ -204,11 +565,22 @@ export class MangaDex extends Source {
 
       // Get the section data
       promises.push(
-        this.requestManager.schedule(section.request, 1).then(response => {
-          const json = JSON.parse(response.data) as any
-          const tiles = this.parser.parseMangaTiles(json)
+        this.requestManager.schedule(section.request, 1).then(async response => {
+          const json = typeof response.data === "string" ? JSON.parse(response.data) : response.data
+          let results = []
+          for (const manga of json.results) {
+            const mangaId = manga.data.id
+            const mangaDetails = manga.data.attributes
+            const title = this.decodeHTMLEntity(mangaDetails.title[Object.keys(mangaDetails.title)[0]])
 
-          section.section.items = tiles
+            results.push(createMangaTile({
+              id: mangaId,
+              title: createIconText({text: title}),
+              image: await this.getImageLink(mangaDetails.links, true)
+            }))
+          }
+
+          section.section.items = results
           sectionCallback(section.section)
         }),
       )
@@ -218,95 +590,117 @@ export class MangaDex extends Source {
     await Promise.all(promises)
   }
 
-  async filterUpdatedManga(mangaUpdatesFoundCallback: (updates: MangaUpdates) => void, time: Date, ids: string[]): Promise<void> {
-    const allManga = new Set(ids)
-    let hasManga = true
-    let page = 1
+  async getViewMoreItems(homepageSectionId: string, metadata: any): Promise<PagedResults | null> {
+    let offset: number = metadata?.offset ?? 0
+    let collectedIds: string[] = metadata?.collectedIds ?? []
+    let results = []
+    let url: string = ''
 
-    while (hasManga) {
-      const request = createRequestObject({
-        url: 'https://mangadex.org/titles/0/' + (page++).toString(),
-        method: 'GET',
-        incognito: true,
-        cookies: [
-          createCookie({
-            name: 'mangadex_title_mode',
-            value: '2',
-            domain: MANGADEX_DOMAIN,
-          }),
-        ],
-      })
-
-      // eslint-disable-next-line no-await-in-loop
-      const response = await this.requestManager.schedule(request, 1)
-      const selector = this.cheerio.load(response.data)
-
-      const updatedManga = this.parser.filterUpdatedManga(selector, time, allManga)
-      hasManga = updatedManga.hasMore
-
-      if (updatedManga.updates.length > 0) {
-        // If we found updates on this page, notify the app
-        // This is needed so that the app can save the updates
-        // in case the background job is killed by iOS
-        mangaUpdatesFoundCallback(createMangaUpdates({ ids: updatedManga.updates }))
+    switch(homepageSectionId) {
+      case 'recently_updated': {
+        url = `${MANGADEX_API}/manga?limit=100&offset=${offset}`
+        break
+      }
+      case 'shounen': {
+        url = `${MANGADEX_API}/manga?limit=100&publicationDemographic[0]=shounen&offset=${offset}`
+        break
+      }
+      case 'action': {
+        url = `${MANGADEX_API}/manga?limit=100&includedTags[0]=391b0423-d847-456f-aff0-8b0cfc03066b&offset=${offset}`
+        break
       }
     }
-  }
 
-  constructSearchRequest(query: SearchRequest, page: number, items = 50) {
-    return createRequestObject({
-      url: SEARCH_ENDPOINT + `?page=${page}&items=${items}`,
-      method: 'POST',
-      // We cant just JSON.stringify the `SearchRequest` object
-      // so this is necessary
-      data: JSON.stringify({
-        title: query.title,
-        includeDemographic: query.includeDemographic?.map(x => parseInt(x)),
-        includeTheme: query.includeTheme?.map(x => parseInt(x)),
-        includeFormat: query.includeFormat?.map(x => parseInt(x)),
-        includeContent: query.includeContent?.map(x => parseInt(x)),
-        includeGenre: query.includeGenre?.map(x => parseInt(x)),
-        excludeDemographic: query.excludeDemographic?.map(x => parseInt(x)),
-        excludeTheme: query.excludeTheme?.map(x => parseInt(x)),
-        excludeFormat: query.excludeFormat?.map(x => parseInt(x)),
-        excludeContent: query.excludeContent?.map(x => parseInt(x)),
-        excludeGenre: query.excludeGenre?.map(x => parseInt(x)),
-        includeOperator: query.includeOperator,
-        excludeOperator: query.excludeOperator,
-        author: query.author,
-        artist: query.artist,
-        status: query.status,
-        hStatus: query.hStatus,
-        bypassFilter: true,
-      }),
-      headers: {
-        'content-type': 'application/json',
-      },
+    const request = createRequestObject({
+      url,
+      method: 'GET',
     })
-  }
-
-  async getViewMoreItems(homepageSectionId: string, metadata: any): Promise<PagedResults | null> {
-    const requests: {[x: string]: Request} = {
-      shounen: this.constructSearchRequest({
-        includeDemographic: ['1'],
-      }, metadata?.page ?? 1, 50),
-      action: this.constructSearchRequest({
-        includeGenre: ['2'],
-      }, metadata?.page ?? 1, 50),
-      recently_updated: this.constructSearchRequest({}, metadata?.page ?? 1, 50),
-    }
-
-    const request = requests[homepageSectionId]
 
     const response = await this.requestManager.schedule(request, 1)
-    const json = JSON.parse(response.data) as any
-    const tiles = this.parser.parseMangaTiles(json)
+    const json = typeof response.data === "string" ? JSON.parse(response.data) : response.data
+
+    for (const manga of json.results) {
+      const mangaId = manga.data.id
+      const mangaDetails = manga.data.attributes
+      const title = this.decodeHTMLEntity(mangaDetails.title[Object.keys(mangaDetails.title)[0]])
+
+      if (!collectedIds.includes(mangaId)) {
+        results.push(createMangaTile({
+          id: mangaId,
+          title: createIconText({text: title}),
+          image: await this.getImageLink(mangaDetails.links, true)
+        }))
+        collectedIds.push(mangaId)
+      }
+    }
 
     return createPagedResults({
-      results: tiles,
-      metadata: {
-        page: (metadata?.page ?? 1) + 1,
-      },
-    })
+      results,
+      metadata: {offset: offset + 100, collectedIds}
+  })
   }
+
+  async filterUpdatedManga(mangaUpdatesFoundCallback: (updates: MangaUpdates) => void, time: Date, ids: string[]): Promise<void> {
+    let legacyIds: string[] = ids.filter(x => !x.includes('-'))
+    let conversionDict: {[id: string]: string} = {}
+    if (legacyIds.length != 0 ) {
+      conversionDict = await this.getMangaUUIDs(legacyIds)
+      for (const key of Object.keys(conversionDict)) {
+        conversionDict[conversionDict[key]] = key
+      }
+    }
+
+    let offset = 0
+    let loadNextPage = true
+    let updatedManga: string[] = []
+    while (loadNextPage) {
+
+      const updatedAt = time.toISOString().substr(0, time.toISOString().length - 5) // They support a weirdly truncated version of an ISO timestamp. A magic number of '5' seems to be always valid
+
+      const request = createRequestObject({
+        url: `${MANGADEX_API}/manga?limit=100&offset=${offset}&updatedAtSince=${updatedAt}`,
+        method: 'GET',
+      })
+
+      const response = await this.requestManager.schedule(request, 1)
+
+      // If we have no content, there are no updates available
+      if(response.status == 204) {
+        return
+      }
+
+      const json = typeof response.data === "string" ? JSON.parse(response.data) : response.data
+
+      for (const manga of json.results) {
+        const mangaId = manga.data.id
+        const mangaTime = new Date(manga.data.attributes.updatedAt)
+
+        if (mangaTime <= time) {
+          loadNextPage = false
+        } else if (ids.includes(mangaId)) {
+          updatedManga.push(mangaId)
+        } else if (ids.includes(conversionDict[mangaId])) {
+          updatedManga.push(conversionDict[mangaId])
+        }
+      }
+      if (loadNextPage) {
+        offset = offset + 100
+      }
+    }
+    if (updatedManga.length > 0) {
+      mangaUpdatesFoundCallback(createMangaUpdates({
+          ids: updatedManga
+      }))
+    }
+  }
+
+  decodeHTMLEntity(str: string): string {
+        return str.replace(/&#(\d+);/g, function (match, dec) {
+            return String.fromCharCode(dec);
+        })
+         .replace(/&amp;/g, '&')
+         .replace(/&lt;/g, '<')
+         .replace(/&gt;/g, '>')
+         .replace(/&quot;/g, '\"')
+    }
 }
