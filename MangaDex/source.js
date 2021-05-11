@@ -342,10 +342,10 @@ const MANGADEX_DOMAIN = 'https://mangadex.org';
 const MANGADEX_API = 'https://api.mangadex.org';
 exports.MangaDexInfo = {
     author: 'nar1n',
-    description: 'Extension that pulls manga from MangaDex"',
+    description: 'Extension that pulls manga from MangaDex',
     icon: 'icon.png',
     name: 'MangaDex',
-    version: '1.0.0',
+    version: '1.0.1',
     authorWebsite: 'https://github.com/nar1n',
     websiteBaseURL: MANGADEX_DOMAIN,
     hentaiSource: false,
@@ -532,8 +532,10 @@ class MangaDex extends paperback_extensions_common_1.Source {
             }
             // Kitsu
             if (links.kt !== undefined) {
-                // Available sizes: tiny, small, medium, large
-                return `https://media.kitsu.io/manga/poster_images/${links.kt}/small.jpg`;
+                if (!isNaN(Number(links.kt))) {
+                    // Available sizes: tiny, small, medium, large
+                    return `https://media.kitsu.io/manga/poster_images/${links.kt}/small.jpg`;
+                }
             }
             if (extraResults) {
                 // MyAnimeList
@@ -578,20 +580,21 @@ class MangaDex extends paperback_extensions_common_1.Source {
                     // data has the format {"data": {"Media": {"coverImage": {"large": "URL"}}}}
                     return data.data.Media.coverImage.large;
                 }
-                // MangaUpdates
-                if (links.mu !== undefined) {
-                    // MangaUpdates does not have an API
-                    const request = createRequestObject({
-                        url: `https://www.mangaupdates.com/series.html?id=${links.mu}`,
-                        method: 'GET',
-                    });
-                    const response = yield this.requestManager.schedule(request, 1);
-                    const $ = this.cheerio.load(response.data);
-                    const url = $('.sContent .img-fluid').attr('src');
-                    if (url !== undefined) {
-                        return url;
-                    }
-                }
+                // Currently broken
+                // // MangaUpdates
+                // if (links.mu !== undefined) {
+                //   // MangaUpdates does not have an API
+                //   const request = createRequestObject({
+                //     url: `https://www.mangaupdates.com/series.html?id=${links.mu}`,
+                //     method: 'GET',
+                //   })
+                //   const response = await this.requestManager.schedule(request, 1)
+                //   const $ = this.cheerio.load(response.data)
+                //   const url = $('.sContent .img-fluid').attr('src')
+                //   if (url !== undefined){
+                //     return url
+                //   }
+                // }
                 // Anime-Planet
                 if (links.ap !== undefined) {
                     // Anime-Planet does not have an API
@@ -877,19 +880,23 @@ class MangaDex extends paperback_extensions_common_1.Source {
             });
             const response = yield this.requestManager.schedule(request, 1);
             const json = typeof response.data === "string" ? JSON.parse(response.data) : response.data;
+            const promises = [];
             for (const manga of json.results) {
                 const mangaId = manga.data.id;
                 const mangaDetails = manga.data.attributes;
                 const title = this.decodeHTMLEntity(mangaDetails.title[Object.keys(mangaDetails.title)[0]]);
                 if (!collectedIds.includes(mangaId)) {
-                    results.push(createMangaTile({
-                        id: mangaId,
-                        title: createIconText({ text: title }),
-                        image: yield this.getImageLink(mangaDetails.links, true)
+                    promises.push(this.getImageLink(mangaDetails.links, true).then(imageLink => {
+                        results.push(createMangaTile({
+                            id: mangaId,
+                            title: createIconText({ text: title }),
+                            image: imageLink
+                        }));
+                        collectedIds.push(mangaId);
                     }));
-                    collectedIds.push(mangaId);
                 }
             }
+            Promise.all(promises);
             return createPagedResults({
                 results,
                 metadata: { offset: offset + 100, collectedIds }
@@ -952,7 +959,23 @@ class MangaDex extends paperback_extensions_common_1.Source {
             .replace(/&amp;/g, '&')
             .replace(/&lt;/g, '<')
             .replace(/&gt;/g, '>')
-            .replace(/&quot;/g, '\"');
+            .replace(/&quot;/g, '\"')
+            .replace(/&mdash;/g, '—')
+            .replace(/&ndash;/g, '–')
+            .replace(/&rsquo;/g, '’')
+            .replace(/&grave;/g, '`')
+            .replace(/&apos;/g, '\'')
+            .replace(/&quest;/g, '?')
+            .replace(/&iquest;/g, '¿')
+            .replace(/&excl;/g, '!')
+            .replace(/&num;/g, '#')
+            .replace(/&dollar;/g, '$')
+            .replace(/&percnt;/g, '%')
+            .replace(/&commat;/g, '@')
+            .replace(/&ldquo;/g, '“')
+            .replace(/&rdquo;/g, '”')
+            .replace(/&hellip;/g, '…')
+            .replace(/&hearts;/g, '♥');
     }
 }
 exports.MangaDex = MangaDex;
