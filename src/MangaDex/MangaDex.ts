@@ -24,7 +24,7 @@ export const MangaDexInfo: SourceInfo = {
   description: 'Extension that pulls manga from MangaDex',
   icon: 'icon.png',
   name: 'MangaDex',
-  version: '1.0.1',
+  version: '1.0.2',
   authorWebsite: 'https://github.com/nar1n',
   websiteBaseURL: MANGADEX_DOMAIN,
   hentaiSource: false,
@@ -413,6 +413,8 @@ export class MangaDex extends Source {
       const json = typeof response.data === "string" ? JSON.parse(response.data) : response.data
       offset += 500
 
+      if(json.results === undefined) throw new Error(`Failed to parse json results for ${newMangaId}`)
+
       for (const chapter of json.results) {
         const chapterId = chapter.data.id
         const chapterDetails = chapter.data.attributes
@@ -506,6 +508,8 @@ export class MangaDex extends Source {
 
     const json = typeof response.data === "string" ? JSON.parse(response.data) : response.data
 
+    if(json.results === undefined) {throw new Error(`Failed to parse json for the given search`)}
+
     for (const manga of json.results) {
       const mangaId = manga.data.id
       const mangaDetails = manga.data.attributes
@@ -571,6 +575,9 @@ export class MangaDex extends Source {
         this.requestManager.schedule(section.request, 1).then(async response => {
           const json = typeof response.data === "string" ? JSON.parse(response.data) : response.data
           let results = []
+
+          if(json.results === undefined) throw new Error(`Failed to parse json results for section ${section.section.title}`)
+
           for (const manga of json.results) {
             const mangaId = manga.data.id
             const mangaDetails = manga.data.attributes
@@ -623,6 +630,8 @@ export class MangaDex extends Source {
     const json = typeof response.data === "string" ? JSON.parse(response.data) : response.data
 
     const promises: Promise<void>[] = []
+
+    if(json.results === undefined) throw new Error(`Failed to parse json results for getViewMoreItems`)
 
     for (const manga of json.results) {
       const mangaId = manga.data.id
@@ -679,6 +688,12 @@ export class MangaDex extends Source {
       }
 
       const json = typeof response.data === "string" ? JSON.parse(response.data) : response.data
+
+      if(json.results === undefined) {
+        // Log this, no need to throw.
+        console.log(`Failed to parse JSON results for filterUpdatedManga using the date ${updatedAt} and the offset ${offset}`)
+        return
+      }
 
       for (const manga of json.results) {
         const mangaId = manga.data.id
