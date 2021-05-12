@@ -12,10 +12,10 @@ export const parseMangaDetails = ($: CheerioStatic, mangaId: string): Manga => {
     titles.push(t.trim());
   }
 
-  const image = RM_DOMAIN + $("img.series-profile-thumb")?.attr("src") ?? "";
+  const image = RM_DOMAIN + $("img.series-profile-thumb")?.attr("src") ?? "https://i.imgur.com/GYUxEX8.png";
   const author = $("small", "span#first_episode").text().trim() ?? "";
   const artist = $("small", "span#last_episode").text().trim() ?? "";
-  const description = $("p", "div.series-summary-wrapper").text().trim() ?? "";
+  const description = $("p", "div.series-summary-wrapper").text().trim() ?? "No description available";
   const rating = $("div.color-imdb").text().trim() ?? "";
   const views = Number($('div:contains("Views")', "div.media-meta").next().text().replace(/,/g, "") ?? 0);
 
@@ -24,7 +24,8 @@ export const parseMangaDetails = ($: CheerioStatic, mangaId: string): Manga => {
   const arrayTags: Tag[] = [];
   for (const tag of $("a", $("div.ui.list", "div.item")).toArray()) {
     const label = $(tag).text().trim();
-    const id = $(tag).attr('href')?.split("category/")[1] ?? "";
+    const id = $(tag).attr('href')?.replace("/category/", "") ?? "";
+    if (!id || !label) continue;
     if (["ADULT", "SMUT", "MATURE"].includes(label.toUpperCase())) hentai = true; //These tags don't exist on Readm, but they may be added in the future!
     arrayTags.push({ id: id, label: label });
   }
@@ -63,11 +64,13 @@ export const parseMangaDetails = ($: CheerioStatic, mangaId: string): Manga => {
 export const parseChapters = ($: CheerioStatic, mangaId: string): Chapter[] => {
   const chapters: Chapter[] = [];
 
-  for (const elem of $("div.season_start").toArray()) {
-    const title = $("h6.truncate", elem).first().text().trim() ?? "";
-    const chapterId = $('a', elem).attr('href')?.split(mangaId + "/").pop() ?? '';
-    const chapterNumber = Number(title.match(/(\d+)/)![0] ?? 0);
-    const date = parseDate($("td.episode-date", elem)?.text() ?? "");
+  for (const c of $("div.season_start").toArray()) {
+    const title = $("h6.truncate", c).first().text().trim() ?? "";
+    const rawChapterId = $('a', c).attr('href') ?? "";
+    const chapterId = /\/manga\/[A-z0-9]+\/(.*?)\//.test(rawChapterId) ? rawChapterId.match(/\/manga\/[A-z0-9]+\/(.*?)\//)![1] : null;
+    if (!chapterId) continue;
+    const chapterNumber = Number(/(\d+)/.test(title) ? title.match(/(\d+)/)![0] : 0);
+    const date = parseDate($("td.episode-date", c)?.text() ?? "");
     chapters.push(createChapter({
       id: chapterId,
       mangaId,
@@ -77,7 +80,6 @@ export const parseChapters = ($: CheerioStatic, mangaId: string): Chapter[] => {
       time: date,
     }));
   }
-
   return chapters;
 }
 
@@ -103,7 +105,8 @@ export const parseTags = ($: CheerioStatic): TagSection[] | null => {
   const arrayTags: Tag[] = [];
   for (const tag of $("li", "ul.trending-thisweek.categories").toArray()) {
     const label = $("a", tag).text().trim();
-    const id = $("a", tag).attr('href')?.split("category/")[1] ?? "";
+    const id = $("a", tag).attr('href')?.replace("/category/", "") ?? "";
+    if (!id || !label) continue;
     arrayTags.push({ id: id, label: label });
   }
   const tagSections: TagSection[] = [createTagSection({ id: '0', label: 'genres', tags: arrayTags.map(x => createTag(x)) })];
@@ -119,9 +122,9 @@ export const parseUpdatedManga = ($: CheerioStatic, time: Date, ids: string[]): 
   const updatedManga: string[] = [];
   let loadMore = true;
 
-  for (const p of $("div.poster.poster-xs", $("ul.clearfix.latest-updates").first()).toArray()) {
-    const id = $('a', p).attr('href')?.split('manga/').pop() ?? '';
-    const mangaDate = parseDate($("span.date", p).text().trim() ?? "");
+  for (const m of $("div.poster.poster-xs", $("ul.clearfix.latest-updates").first()).toArray()) {
+    const id = $('a', m).attr('href')?.replace("/manga/", "") ?? "";
+    const mangaDate = parseDate($("span.date", m).text().trim() ?? "");
     if (mangaDate > time) {
       if (ids.includes(id)) {
         updatedManga.push(id);
@@ -141,10 +144,11 @@ export const parseHomeSections = ($: CheerioStatic, sections: HomeSection[], sec
 
   //Hot Mango Update
   const hotMangaUpdate: MangaTile[] = [];
-  for (const manga of $("div.item", "div#manga-hot-updates").toArray()) {
-    const title: string = $("strong", manga).text().trim();
-    const id = $('a', manga).attr('href')?.match("\\/manga\\/(.*?)\\/")![1] ?? '';
-    const image = RM_DOMAIN + $("img", manga)?.attr("src") ?? "";
+  for (const m of $("div.item", "div#manga-hot-updates").toArray()) {
+    const title: string = $("strong", m).text().trim();
+    const rawId = $('a', m).attr('href') ?? "";
+    const id = /\/manga\/(.*?)\//.test(rawId) ? rawId.match(/\/manga\/(.*?)\//)![1] : null;
+    const image = RM_DOMAIN + $("img", m)?.attr("src") ?? ""
     if (!id || !title) continue;
     hotMangaUpdate.push(createMangaTile({
       id: id,
@@ -157,11 +161,11 @@ export const parseHomeSections = ($: CheerioStatic, sections: HomeSection[], sec
 
   //Hot Mango
   const hotManga: MangaTile[] = [];
-  for (const manga of $("ul#latest_trailers li").toArray()) {
-    const title: string = $("h6", manga).text().trim();
-    const id = $('a', manga).attr('href')?.split('manga/').pop() ?? "";
-    const image = RM_DOMAIN + $("img", manga)?.attr("data-src") ?? "";
-    const subtitle: string = $("small", manga).first().text().trim() ?? "";
+  for (const m of $("ul#latest_trailers li").toArray()) {
+    const title: string = $("h6", m).text().trim();
+    const id = $('a', m).attr('href')?.replace("/manga/", "") ?? "";
+    const image = RM_DOMAIN + $("img", m)?.attr("data-src") ?? "";
+    const subtitle: string = $("small", m).first().text().trim() ?? "";
     if (!id || !title) continue;
     hotManga.push(createMangaTile({
       id: id,
@@ -175,10 +179,10 @@ export const parseHomeSections = ($: CheerioStatic, sections: HomeSection[], sec
 
   //Latest Mango
   const latestManga: MangaTile[] = [];
-  for (const manga of $("div.poster.poster-xs", $("ul.clearfix.latest-updates").first()).toArray()) {
-    const title: string = $("h2", manga).first().text().trim();
-    const id = $('a', manga).attr('href')?.split('manga/').pop() ?? "";
-    const image = RM_DOMAIN + $("img", manga)?.attr("data-src") ?? "";
+  for (const m of $("div.poster.poster-xs", $("ul.clearfix.latest-updates").first()).toArray()) {
+    const title: string = $("h2", m).first().text().trim();
+    const id = $('a', m).attr('href')?.replace("/manga/", "") ?? "";
+    const image = RM_DOMAIN + $("img", m)?.attr("data-src") ?? "";
     if (!id || !title) continue;
     latestManga.push(createMangaTile({
       id: id,
@@ -191,10 +195,10 @@ export const parseHomeSections = ($: CheerioStatic, sections: HomeSection[], sec
 
   //New Mango
   const newManga: MangaTile[] = [];
-  for (const manga of $("li", "ul.clearfix.mb-0").toArray()) {
-    const title: string = $("h2", manga).first().text().trim();
-    const id = $('a', manga).attr('href')?.split('manga/').pop() ?? "";
-    const image = RM_DOMAIN + $("img", manga)?.attr("data-src");
+  for (const m of $("li", "ul.clearfix.mb-0").toArray()) {
+    const title: string = $("h2", m).first().text().trim();
+    const id = $('a', m).attr('href')?.replace("/manga/", "") ?? "";
+    const image = RM_DOMAIN + $("img", m)?.attr("data-src");
     if (!id || !title) continue;
     newManga.push(createMangaTile({
       id: id,
@@ -217,10 +221,10 @@ export const parseViewMore = ($: CheerioStatic, homepageSectionId: string): Mang
   const manga: MangaTile[] = [];
 
   if (homepageSectionId === "hot_manga") {
-    for (const p of $("li.mb-lg", "ul.filter-results").toArray()) {
-      const title: string = $("h2", p).first().text().trim();
-      const id = $('a', p).attr('href')?.split('manga/').pop() ?? "";
-      const image = RM_DOMAIN + $("img", p)?.attr("src") ?? "";
+    for (const m of $("li.mb-lg", "ul.filter-results").toArray()) {
+      const title: string = $("h2", m).first().text().trim();
+      const id = $('a', m).attr('href')?.replace("/manga/", "") ?? "";
+      const image = RM_DOMAIN + $("img", m)?.attr("src") ?? "";
       if (!id || !title) continue;
       manga.push(createMangaTile({
         id,
@@ -229,10 +233,10 @@ export const parseViewMore = ($: CheerioStatic, homepageSectionId: string): Mang
       }));
     }
   } else {
-    for (const p of $("div.poster.poster-xs", $("ul.clearfix.latest-updates").first()).toArray()) {
-      const title: string = $("h2", p).first().text().trim();
-      const id = $('a', p).attr('href')?.split('manga/').pop() ?? "";
-      const image = RM_DOMAIN + $("img", p)?.attr("data-src") ?? "";
+    for (const m of $("div.poster.poster-xs", $("ul.clearfix.latest-updates").first()).toArray()) {
+      const title: string = $("h2", m).first().text().trim();
+      const id = $('a', m).attr('href')?.replace("/manga/", "") ?? "";
+      const image = RM_DOMAIN + $("img", m)?.attr("data-src") ?? "";
       if (!id || !title) continue;
       manga.push(createMangaTile({
         id,

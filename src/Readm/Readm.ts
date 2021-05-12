@@ -18,7 +18,7 @@ const RM_DOMAIN = 'https://readm.org'
 const method = 'GET'
 
 export const ReadmInfo: SourceInfo = {
-  version: '1.0.8',
+  version: '1.0.10',
   name: 'Readm',
   icon: 'icon.png',
   author: 'Netsky',
@@ -64,7 +64,8 @@ export class Readm extends Source {
   async getChapterDetails(mangaId: string, chapterId: string): Promise<ChapterDetails> {
     const request = createRequestObject({
       url: `${RM_DOMAIN}/manga/${mangaId}/${chapterId}`,
-      method: method,
+      method,
+      param: "/all-pages"
     });
 
     const response = await this.requestManager.schedule(request, 1);
@@ -74,7 +75,7 @@ export class Readm extends Source {
 
   async getTags(): Promise<TagSection[] | null> {
     const request = createRequestObject({
-      url: `${RM_DOMAIN}`,
+      url: RM_DOMAIN,
       method,
     });
 
@@ -127,7 +128,7 @@ export class Readm extends Source {
 
   async getViewMoreItems(homepageSectionId: string, metadata: any): Promise<PagedResults | null> {
     let page: number = metadata?.page ?? 1;
-    let param = '';
+    let param = "";
     switch (homepageSectionId) {
       case "hot_manga":
         param = `/popular-manga/${page}`;
@@ -140,7 +141,7 @@ export class Readm extends Source {
     }
 
     const request = createRequestObject({
-      url: `${RM_DOMAIN}`,
+      url: RM_DOMAIN,
       method,
       param,
     });
@@ -156,9 +157,9 @@ export class Readm extends Source {
     });
   }
 
-  async searchRequest(query: SearchRequest, metadata: any): Promise<PagedResults> {
+  async searchRequest(query: SearchRequest): Promise<PagedResults> {
     const search = generateSearch(query);
-    const Searchrequest = createRequestObject({
+    const request = createRequestObject({
       url: `${RM_DOMAIN}/service/search`,
       method: "POST",
       headers: {
@@ -168,13 +169,19 @@ export class Readm extends Source {
       data: `dataType=json&phrase=${search}`
     });
 
-    let response = await this.requestManager.schedule(Searchrequest, 1);
+    let response = await this.requestManager.schedule(request, 1);
     response = typeof response.data === "string" ? JSON.parse(response.data) : response.data;
     const data = Object(response);
     const manga: MangaTile[] = [];
 
+    if (!data.manga) throw new Error("Failed to create proper response object, missing manga property!");
+
     for (const m of data.manga) {
-      const id = m.url.split("/manga/")[1];
+      if (!m.url) {
+        console.log("Missing URL property in manga object!");
+        continue;
+      }
+      const id = m.url.replace("/manga/", "");
       const image = RM_DOMAIN + m.image;
       const title = m.title;
       manga.push(createMangaTile({
