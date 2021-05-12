@@ -341,7 +341,7 @@ const ReadmParser_1 = require("./ReadmParser");
 const RM_DOMAIN = 'https://readm.org';
 const method = 'GET';
 exports.ReadmInfo = {
-    version: '1.0.8',
+    version: '1.0.10',
     name: 'Readm',
     icon: 'icon.png',
     author: 'Netsky',
@@ -386,7 +386,8 @@ class Readm extends paperback_extensions_common_1.Source {
         return __awaiter(this, void 0, void 0, function* () {
             const request = createRequestObject({
                 url: `${RM_DOMAIN}/manga/${mangaId}/${chapterId}`,
-                method: method,
+                method,
+                param: "/all-pages"
             });
             const response = yield this.requestManager.schedule(request, 1);
             const $ = this.cheerio.load(response.data, { xmlMode: false });
@@ -396,7 +397,7 @@ class Readm extends paperback_extensions_common_1.Source {
     getTags() {
         return __awaiter(this, void 0, void 0, function* () {
             const request = createRequestObject({
-                url: `${RM_DOMAIN}`,
+                url: RM_DOMAIN,
                 method,
             });
             const response = yield this.requestManager.schedule(request, 1);
@@ -447,7 +448,7 @@ class Readm extends paperback_extensions_common_1.Source {
         var _a;
         return __awaiter(this, void 0, void 0, function* () {
             let page = (_a = metadata === null || metadata === void 0 ? void 0 : metadata.page) !== null && _a !== void 0 ? _a : 1;
-            let param = '';
+            let param = "";
             switch (homepageSectionId) {
                 case "hot_manga":
                     param = `/popular-manga/${page}`;
@@ -460,7 +461,7 @@ class Readm extends paperback_extensions_common_1.Source {
                     ;
             }
             const request = createRequestObject({
-                url: `${RM_DOMAIN}`,
+                url: RM_DOMAIN,
                 method,
                 param,
             });
@@ -474,10 +475,10 @@ class Readm extends paperback_extensions_common_1.Source {
             });
         });
     }
-    searchRequest(query, metadata) {
+    searchRequest(query) {
         return __awaiter(this, void 0, void 0, function* () {
             const search = ReadmParser_1.generateSearch(query);
-            const Searchrequest = createRequestObject({
+            const request = createRequestObject({
                 url: `${RM_DOMAIN}/service/search`,
                 method: "POST",
                 headers: {
@@ -486,12 +487,18 @@ class Readm extends paperback_extensions_common_1.Source {
                 },
                 data: `dataType=json&phrase=${search}`
             });
-            let response = yield this.requestManager.schedule(Searchrequest, 1);
+            let response = yield this.requestManager.schedule(request, 1);
             response = typeof response.data === "string" ? JSON.parse(response.data) : response.data;
             const data = Object(response);
             const manga = [];
+            if (!data.manga)
+                throw new Error("Failed to create proper response object, missing manga property!");
             for (const m of data.manga) {
-                const id = m.url.split("/manga/")[1];
+                if (!m.url) {
+                    console.log("Missing URL property in manga object!");
+                    continue;
+                }
+                const id = m.url.replace("/manga/", "");
                 const image = RM_DOMAIN + m.image;
                 const title = m.title;
                 manga.push(createMangaTile({
@@ -522,17 +529,19 @@ exports.parseMangaDetails = ($, mangaId) => {
     for (const t of altTitles) {
         titles.push(t.trim());
     }
-    const image = (_b = RM_DOMAIN + ((_a = $("img.series-profile-thumb")) === null || _a === void 0 ? void 0 : _a.attr("src"))) !== null && _b !== void 0 ? _b : "";
+    const image = (_b = RM_DOMAIN + ((_a = $("img.series-profile-thumb")) === null || _a === void 0 ? void 0 : _a.attr("src"))) !== null && _b !== void 0 ? _b : "https://i.imgur.com/GYUxEX8.png";
     const author = (_c = $("small", "span#first_episode").text().trim()) !== null && _c !== void 0 ? _c : "";
     const artist = (_d = $("small", "span#last_episode").text().trim()) !== null && _d !== void 0 ? _d : "";
-    const description = (_e = $("p", "div.series-summary-wrapper").text().trim()) !== null && _e !== void 0 ? _e : "";
+    const description = (_e = $("p", "div.series-summary-wrapper").text().trim()) !== null && _e !== void 0 ? _e : "No description available";
     const rating = (_f = $("div.color-imdb").text().trim()) !== null && _f !== void 0 ? _f : "";
     const views = Number((_g = $('div:contains("Views")', "div.media-meta").next().text().replace(/,/g, "")) !== null && _g !== void 0 ? _g : 0);
     let hentai = false;
     const arrayTags = [];
     for (const tag of $("a", $("div.ui.list", "div.item")).toArray()) {
         const label = $(tag).text().trim();
-        const id = (_j = (_h = $(tag).attr('href')) === null || _h === void 0 ? void 0 : _h.split("category/")[1]) !== null && _j !== void 0 ? _j : "";
+        const id = (_j = (_h = $(tag).attr('href')) === null || _h === void 0 ? void 0 : _h.replace("/category/", "")) !== null && _j !== void 0 ? _j : "";
+        if (!id || !label)
+            continue;
         if (["ADULT", "SMUT", "MATURE"].includes(label.toUpperCase()))
             hentai = true; //These tags don't exist on Readm, but they may be added in the future!
         arrayTags.push({ id: id, label: label });
@@ -567,13 +576,16 @@ exports.parseMangaDetails = ($, mangaId) => {
     });
 };
 exports.parseChapters = ($, mangaId) => {
-    var _a, _b, _c, _d, _e, _f;
+    var _a, _b, _c, _d;
     const chapters = [];
-    for (const elem of $("div.season_start").toArray()) {
-        const title = (_a = $("h6.truncate", elem).first().text().trim()) !== null && _a !== void 0 ? _a : "";
-        const chapterId = (_c = (_b = $('a', elem).attr('href')) === null || _b === void 0 ? void 0 : _b.split(mangaId + "/").pop()) !== null && _c !== void 0 ? _c : '';
-        const chapterNumber = Number((_d = title.match(/(\d+)/)[0]) !== null && _d !== void 0 ? _d : 0);
-        const date = parseDate((_f = (_e = $("td.episode-date", elem)) === null || _e === void 0 ? void 0 : _e.text()) !== null && _f !== void 0 ? _f : "");
+    for (const c of $("div.season_start").toArray()) {
+        const title = (_a = $("h6.truncate", c).first().text().trim()) !== null && _a !== void 0 ? _a : "";
+        const rawChapterId = (_b = $('a', c).attr('href')) !== null && _b !== void 0 ? _b : "";
+        const chapterId = /\/manga\/[A-z0-9]+\/(.*?)\//.test(rawChapterId) ? rawChapterId.match(/\/manga\/[A-z0-9]+\/(.*?)\//)[1] : null;
+        if (!chapterId)
+            continue;
+        const chapterNumber = Number(/(\d+)/.test(title) ? title.match(/(\d+)/)[0] : 0);
+        const date = parseDate((_d = (_c = $("td.episode-date", c)) === null || _c === void 0 ? void 0 : _c.text()) !== null && _d !== void 0 ? _d : "");
         chapters.push(createChapter({
             id: chapterId,
             mangaId,
@@ -605,7 +617,9 @@ exports.parseTags = ($) => {
     const arrayTags = [];
     for (const tag of $("li", "ul.trending-thisweek.categories").toArray()) {
         const label = $("a", tag).text().trim();
-        const id = (_b = (_a = $("a", tag).attr('href')) === null || _a === void 0 ? void 0 : _a.split("category/")[1]) !== null && _b !== void 0 ? _b : "";
+        const id = (_b = (_a = $("a", tag).attr('href')) === null || _a === void 0 ? void 0 : _a.replace("/category/", "")) !== null && _b !== void 0 ? _b : "";
+        if (!id || !label)
+            continue;
         arrayTags.push({ id: id, label: label });
     }
     const tagSections = [createTagSection({ id: '0', label: 'genres', tags: arrayTags.map(x => createTag(x)) })];
@@ -615,9 +629,9 @@ exports.parseUpdatedManga = ($, time, ids) => {
     var _a, _b, _c;
     const updatedManga = [];
     let loadMore = true;
-    for (const p of $("div.poster.poster-xs", $("ul.clearfix.latest-updates").first()).toArray()) {
-        const id = (_b = (_a = $('a', p).attr('href')) === null || _a === void 0 ? void 0 : _a.split('manga/').pop()) !== null && _b !== void 0 ? _b : '';
-        const mangaDate = parseDate((_c = $("span.date", p).text().trim()) !== null && _c !== void 0 ? _c : "");
+    for (const m of $("div.poster.poster-xs", $("ul.clearfix.latest-updates").first()).toArray()) {
+        const id = (_b = (_a = $('a', m).attr('href')) === null || _a === void 0 ? void 0 : _a.replace("/manga/", "")) !== null && _b !== void 0 ? _b : "";
+        const mangaDate = parseDate((_c = $("span.date", m).text().trim()) !== null && _c !== void 0 ? _c : "");
         if (mangaDate > time) {
             if (ids.includes(id)) {
                 updatedManga.push(id);
@@ -633,15 +647,16 @@ exports.parseUpdatedManga = ($, time, ids) => {
     };
 };
 exports.parseHomeSections = ($, sections, sectionCallback) => {
-    var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r;
+    var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q;
     for (const section of sections)
         sectionCallback(section);
     //Hot Mango Update
     const hotMangaUpdate = [];
-    for (const manga of $("div.item", "div#manga-hot-updates").toArray()) {
-        const title = $("strong", manga).text().trim();
-        const id = (_b = (_a = $('a', manga).attr('href')) === null || _a === void 0 ? void 0 : _a.match("\\/manga\\/(.*?)\\/")[1]) !== null && _b !== void 0 ? _b : '';
-        const image = (_d = RM_DOMAIN + ((_c = $("img", manga)) === null || _c === void 0 ? void 0 : _c.attr("src"))) !== null && _d !== void 0 ? _d : "";
+    for (const m of $("div.item", "div#manga-hot-updates").toArray()) {
+        const title = $("strong", m).text().trim();
+        const rawId = (_a = $('a', m).attr('href')) !== null && _a !== void 0 ? _a : "";
+        const id = /\/manga\/(.*?)\//.test(rawId) ? rawId.match(/\/manga\/(.*?)\//)[1] : null;
+        const image = (_c = RM_DOMAIN + ((_b = $("img", m)) === null || _b === void 0 ? void 0 : _b.attr("src"))) !== null && _c !== void 0 ? _c : "";
         if (!id || !title)
             continue;
         hotMangaUpdate.push(createMangaTile({
@@ -654,11 +669,11 @@ exports.parseHomeSections = ($, sections, sectionCallback) => {
     sectionCallback(sections[0]);
     //Hot Mango
     const hotManga = [];
-    for (const manga of $("ul#latest_trailers li").toArray()) {
-        const title = $("h6", manga).text().trim();
-        const id = (_f = (_e = $('a', manga).attr('href')) === null || _e === void 0 ? void 0 : _e.split('manga/').pop()) !== null && _f !== void 0 ? _f : "";
-        const image = (_h = RM_DOMAIN + ((_g = $("img", manga)) === null || _g === void 0 ? void 0 : _g.attr("data-src"))) !== null && _h !== void 0 ? _h : "";
-        const subtitle = (_j = $("small", manga).first().text().trim()) !== null && _j !== void 0 ? _j : "";
+    for (const m of $("ul#latest_trailers li").toArray()) {
+        const title = $("h6", m).text().trim();
+        const id = (_e = (_d = $('a', m).attr('href')) === null || _d === void 0 ? void 0 : _d.replace("/manga/", "")) !== null && _e !== void 0 ? _e : "";
+        const image = (_g = RM_DOMAIN + ((_f = $("img", m)) === null || _f === void 0 ? void 0 : _f.attr("data-src"))) !== null && _g !== void 0 ? _g : "";
+        const subtitle = (_h = $("small", m).first().text().trim()) !== null && _h !== void 0 ? _h : "";
         if (!id || !title)
             continue;
         hotManga.push(createMangaTile({
@@ -672,10 +687,10 @@ exports.parseHomeSections = ($, sections, sectionCallback) => {
     sectionCallback(sections[1]);
     //Latest Mango
     const latestManga = [];
-    for (const manga of $("div.poster.poster-xs", $("ul.clearfix.latest-updates").first()).toArray()) {
-        const title = $("h2", manga).first().text().trim();
-        const id = (_l = (_k = $('a', manga).attr('href')) === null || _k === void 0 ? void 0 : _k.split('manga/').pop()) !== null && _l !== void 0 ? _l : "";
-        const image = (_o = RM_DOMAIN + ((_m = $("img", manga)) === null || _m === void 0 ? void 0 : _m.attr("data-src"))) !== null && _o !== void 0 ? _o : "";
+    for (const m of $("div.poster.poster-xs", $("ul.clearfix.latest-updates").first()).toArray()) {
+        const title = $("h2", m).first().text().trim();
+        const id = (_k = (_j = $('a', m).attr('href')) === null || _j === void 0 ? void 0 : _j.replace("/manga/", "")) !== null && _k !== void 0 ? _k : "";
+        const image = (_m = RM_DOMAIN + ((_l = $("img", m)) === null || _l === void 0 ? void 0 : _l.attr("data-src"))) !== null && _m !== void 0 ? _m : "";
         if (!id || !title)
             continue;
         latestManga.push(createMangaTile({
@@ -688,10 +703,10 @@ exports.parseHomeSections = ($, sections, sectionCallback) => {
     sectionCallback(sections[2]);
     //New Mango
     const newManga = [];
-    for (const manga of $("li", "ul.clearfix.mb-0").toArray()) {
-        const title = $("h2", manga).first().text().trim();
-        const id = (_q = (_p = $('a', manga).attr('href')) === null || _p === void 0 ? void 0 : _p.split('manga/').pop()) !== null && _q !== void 0 ? _q : "";
-        const image = RM_DOMAIN + ((_r = $("img", manga)) === null || _r === void 0 ? void 0 : _r.attr("data-src"));
+    for (const m of $("li", "ul.clearfix.mb-0").toArray()) {
+        const title = $("h2", m).first().text().trim();
+        const id = (_p = (_o = $('a', m).attr('href')) === null || _o === void 0 ? void 0 : _o.replace("/manga/", "")) !== null && _p !== void 0 ? _p : "";
+        const image = RM_DOMAIN + ((_q = $("img", m)) === null || _q === void 0 ? void 0 : _q.attr("data-src"));
         if (!id || !title)
             continue;
         newManga.push(createMangaTile({
@@ -714,10 +729,10 @@ exports.parseViewMore = ($, homepageSectionId) => {
     var _a, _b, _c, _d, _e, _f, _g, _h;
     const manga = [];
     if (homepageSectionId === "hot_manga") {
-        for (const p of $("li.mb-lg", "ul.filter-results").toArray()) {
-            const title = $("h2", p).first().text().trim();
-            const id = (_b = (_a = $('a', p).attr('href')) === null || _a === void 0 ? void 0 : _a.split('manga/').pop()) !== null && _b !== void 0 ? _b : "";
-            const image = (_d = RM_DOMAIN + ((_c = $("img", p)) === null || _c === void 0 ? void 0 : _c.attr("src"))) !== null && _d !== void 0 ? _d : "";
+        for (const m of $("li.mb-lg", "ul.filter-results").toArray()) {
+            const title = $("h2", m).first().text().trim();
+            const id = (_b = (_a = $('a', m).attr('href')) === null || _a === void 0 ? void 0 : _a.replace("/manga/", "")) !== null && _b !== void 0 ? _b : "";
+            const image = (_d = RM_DOMAIN + ((_c = $("img", m)) === null || _c === void 0 ? void 0 : _c.attr("src"))) !== null && _d !== void 0 ? _d : "";
             if (!id || !title)
                 continue;
             manga.push(createMangaTile({
@@ -728,10 +743,10 @@ exports.parseViewMore = ($, homepageSectionId) => {
         }
     }
     else {
-        for (const p of $("div.poster.poster-xs", $("ul.clearfix.latest-updates").first()).toArray()) {
-            const title = $("h2", p).first().text().trim();
-            const id = (_f = (_e = $('a', p).attr('href')) === null || _e === void 0 ? void 0 : _e.split('manga/').pop()) !== null && _f !== void 0 ? _f : "";
-            const image = (_h = RM_DOMAIN + ((_g = $("img", p)) === null || _g === void 0 ? void 0 : _g.attr("data-src"))) !== null && _h !== void 0 ? _h : "";
+        for (const m of $("div.poster.poster-xs", $("ul.clearfix.latest-updates").first()).toArray()) {
+            const title = $("h2", m).first().text().trim();
+            const id = (_f = (_e = $('a', m).attr('href')) === null || _e === void 0 ? void 0 : _e.replace("/manga/", "")) !== null && _f !== void 0 ? _f : "";
+            const image = (_h = RM_DOMAIN + ((_g = $("img", m)) === null || _g === void 0 ? void 0 : _g.attr("data-src"))) !== null && _h !== void 0 ? _h : "";
             if (!id || !title)
                 continue;
             manga.push(createMangaTile({
