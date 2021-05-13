@@ -345,7 +345,7 @@ exports.MangaDexInfo = {
     description: 'Extension that pulls manga from MangaDex',
     icon: 'icon.png',
     name: 'MangaDex',
-    version: '1.0.1',
+    version: '1.0.2',
     authorWebsite: 'https://github.com/nar1n',
     websiteBaseURL: MANGADEX_DOMAIN,
     hentaiSource: false,
@@ -693,6 +693,8 @@ class MangaDex extends paperback_extensions_common_1.Source {
                 const response = yield this.requestManager.schedule(request, 1);
                 const json = typeof response.data === "string" ? JSON.parse(response.data) : response.data;
                 offset += 500;
+                if (json.results === undefined)
+                    throw new Error(`Failed to parse json results for ${newMangaId}`);
                 for (const chapter of json.results) {
                     const chapterId = chapter.data.id;
                     const chapterDetails = chapter.data.attributes;
@@ -774,6 +776,9 @@ class MangaDex extends paperback_extensions_common_1.Source {
                 return createPagedResults({ results });
             }
             const json = typeof response.data === "string" ? JSON.parse(response.data) : response.data;
+            if (json.results === undefined) {
+                throw new Error(`Failed to parse json for the given search`);
+            }
             for (const manga of json.results) {
                 const mangaId = manga.data.id;
                 const mangaDetails = manga.data.attributes;
@@ -835,6 +840,8 @@ class MangaDex extends paperback_extensions_common_1.Source {
                 promises.push(this.requestManager.schedule(section.request, 1).then((response) => __awaiter(this, void 0, void 0, function* () {
                     const json = typeof response.data === "string" ? JSON.parse(response.data) : response.data;
                     let results = [];
+                    if (json.results === undefined)
+                        throw new Error(`Failed to parse json results for section ${section.section.title}`);
                     for (const manga of json.results) {
                         const mangaId = manga.data.id;
                         const mangaDetails = manga.data.attributes;
@@ -881,6 +888,8 @@ class MangaDex extends paperback_extensions_common_1.Source {
             const response = yield this.requestManager.schedule(request, 1);
             const json = typeof response.data === "string" ? JSON.parse(response.data) : response.data;
             const promises = [];
+            if (json.results === undefined)
+                throw new Error(`Failed to parse json results for getViewMoreItems`);
             for (const manga of json.results) {
                 const mangaId = manga.data.id;
                 const mangaDetails = manga.data.attributes;
@@ -928,6 +937,11 @@ class MangaDex extends paperback_extensions_common_1.Source {
                     return;
                 }
                 const json = typeof response.data === "string" ? JSON.parse(response.data) : response.data;
+                if (json.results === undefined) {
+                    // Log this, no need to throw.
+                    console.log(`Failed to parse JSON results for filterUpdatedManga using the date ${updatedAt} and the offset ${offset}`);
+                    return;
+                }
                 for (const manga of json.results) {
                     const mangaId = manga.data.id;
                     const mangaTime = new Date(manga.data.attributes.updatedAt);
