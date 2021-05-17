@@ -104,7 +104,7 @@
 							<ul class="tsd-index-list">
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-protected"><a href="_mangadex_mangadex_.mangadex.html#converttime" class="tsd-kind-icon">convert<wbr>Time</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="_mangadex_mangadex_.mangadex.html#decodehtmlentity" class="tsd-kind-icon">decodeHTMLEntity</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-overwrite"><a href="_mangadex_mangadex_.mangadex.html#filterupdatedmanga" class="tsd-kind-icon">filter<wbr>Updated<wbr>Manga</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="_mangadex_mangadex_.mangadex.html#filterupdatedmanga" class="tsd-kind-icon">filter<wbr>Updated<wbr>Manga</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="_mangadex_mangadex_.mangadex.html#getadvancedsearchform" class="tsd-kind-icon">get<wbr>Advanced<wbr>Search<wbr>Form</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="_mangadex_mangadex_.mangadex.html#getappstatefulform" class="tsd-kind-icon">get<wbr>App<wbr>Stateful<wbr>Form</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="_mangadex_mangadex_.mangadex.html#getauthors" class="tsd-kind-icon">get<wbr>Authors</a></li>
@@ -183,7 +183,7 @@
 					<aside class="tsd-sources">
 						<p>Overrides <a href="_batoto_batoto_.batoto.html">BatoTo</a>.<a href="_batoto_batoto_.batoto.html#requestmanager">requestManager</a></p>
 						<ul>
-							<li>Defined in <a href="https://github.com/Paperback-iOS/extensions-promises/blob/8471557/src/MangaDex/MangaDex.ts#L89">src/MangaDex/MangaDex.ts:89</a></li>
+							<li>Defined in <a href="https://github.com/Paperback-iOS/extensions-promises/blob/73269ee/src/MangaDex/MangaDex.ts#L89">src/MangaDex/MangaDex.ts:89</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -224,7 +224,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/Paperback-iOS/extensions-promises/blob/8471557/src/MangaDex/MangaDex.ts#L721">src/MangaDex/MangaDex.ts:721</a></li>
+									<li>Defined in <a href="https://github.com/Paperback-iOS/extensions-promises/blob/73269ee/src/MangaDex/MangaDex.ts#L721">src/MangaDex/MangaDex.ts:721</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -237,24 +237,37 @@
 						</li>
 					</ul>
 				</section>
-				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-overwrite">
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
 					<a name="filterupdatedmanga" class="tsd-anchor"></a>
 					<h3>filter<wbr>Updated<wbr>Manga</h3>
-					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-overwrite">
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
 						<li class="tsd-signature tsd-kind-icon">filter<wbr>Updated<wbr>Manga<span class="tsd-signature-symbol">(</span>mangaUpdatesFoundCallback<span class="tsd-signature-symbol">: </span><span class="tsd-signature-symbol">(</span>updates<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">MangaUpdates</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol"> =&gt; </span><span class="tsd-signature-type">void</span>, time<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Date</span>, ids<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
-								<p>Overrides <a href="_readcomicsonline_readcomicsonline_.readcomicsonline.html">ReadComicsOnline</a>.<a href="_readcomicsonline_readcomicsonline_.readcomicsonline.html#filterupdatedmanga">filterUpdatedManga</a></p>
+								<p>Inherited from <a href="_mangadex_mangadex_.mangadex.html">MangaDex</a>.<a href="_mangadex_mangadex_.mangadex.html#filterupdatedmanga">filterUpdatedManga</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/Paperback-iOS/extensions-promises/blob/8471557/src/MangaDex/MangaDex.ts#L661">src/MangaDex/MangaDex.ts:661</a></li>
+									<li>Defined in node_modules/paperback-extensions-common/dist/base/Source.d.ts:97</li>
 								</ul>
 							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>(OPTIONAL METHOD) A function which should scan through the latest updates section of a website, and report back with a list of IDs which have been
+										updated BEFORE the supplied timeframe.
+										This function may have to scan through multiple pages in order to discover the full list of updated manga.
+										Because of this, each batch of IDs should be returned with the mangaUpdatesFoundCallback. The IDs which have been reported for
+										one page, should not be reported again on another page, unless the relevent ID has been detected again. You do not want to persist
+									this internal list between {@link Request} calls</p>
+								</div>
+							</div>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
 									<h5>mangaUpdatesFoundCallback: <span class="tsd-signature-symbol">(</span>updates<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">MangaUpdates</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol"> =&gt; </span><span class="tsd-signature-type">void</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>A callback which is used to report a list of manga IDs back to the API</p>
+									</div>
 									<ul class="tsd-parameters">
 										<li class="tsd-parameter-signature">
 											<ul class="tsd-signatures tsd-kind-type-literal">
@@ -276,6 +289,10 @@
 								</li>
 								<li>
 									<h5>time: <span class="tsd-signature-type">Date</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>This function should find all manga which has been updated between the current time, and this parameter&#39;s reported time.
+										After this time has been passed, the system should stop parsing and return</p>
+									</div>
 								</li>
 								<li>
 									<h5>ids: <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span></h5>
@@ -345,7 +362,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/Paperback-iOS/extensions-promises/blob/8471557/src/MangaDex/MangaDex.ts#L130">src/MangaDex/MangaDex.ts:130</a></li>
+									<li>Defined in <a href="https://github.com/Paperback-iOS/extensions-promises/blob/73269ee/src/MangaDex/MangaDex.ts#L130">src/MangaDex/MangaDex.ts:130</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -369,7 +386,7 @@
 							<aside class="tsd-sources">
 								<p>Overrides Source.getChapterDetails</p>
 								<ul>
-									<li>Defined in <a href="https://github.com/Paperback-iOS/extensions-promises/blob/8471557/src/MangaDex/MangaDex.ts#L466">src/MangaDex/MangaDex.ts:466</a></li>
+									<li>Defined in <a href="https://github.com/Paperback-iOS/extensions-promises/blob/73269ee/src/MangaDex/MangaDex.ts#L466">src/MangaDex/MangaDex.ts:466</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -396,7 +413,7 @@
 							<aside class="tsd-sources">
 								<p>Overrides Source.getChapters</p>
 								<ul>
-									<li>Defined in <a href="https://github.com/Paperback-iOS/extensions-promises/blob/8471557/src/MangaDex/MangaDex.ts#L393">src/MangaDex/MangaDex.ts:393</a></li>
+									<li>Defined in <a href="https://github.com/Paperback-iOS/extensions-promises/blob/73269ee/src/MangaDex/MangaDex.ts#L393">src/MangaDex/MangaDex.ts:393</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -445,7 +462,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/Paperback-iOS/extensions-promises/blob/8471557/src/MangaDex/MangaDex.ts#L154">src/MangaDex/MangaDex.ts:154</a></li>
+									<li>Defined in <a href="https://github.com/Paperback-iOS/extensions-promises/blob/73269ee/src/MangaDex/MangaDex.ts#L154">src/MangaDex/MangaDex.ts:154</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -469,7 +486,7 @@
 							<aside class="tsd-sources">
 								<p>Overrides Source.getHomePageSections</p>
 								<ul>
-									<li>Defined in <a href="https://github.com/Paperback-iOS/extensions-promises/blob/8471557/src/MangaDex/MangaDex.ts#L531">src/MangaDex/MangaDex.ts:531</a></li>
+									<li>Defined in <a href="https://github.com/Paperback-iOS/extensions-promises/blob/73269ee/src/MangaDex/MangaDex.ts#L531">src/MangaDex/MangaDex.ts:531</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -510,7 +527,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/Paperback-iOS/extensions-promises/blob/8471557/src/MangaDex/MangaDex.ts#L200">src/MangaDex/MangaDex.ts:200</a></li>
+									<li>Defined in <a href="https://github.com/Paperback-iOS/extensions-promises/blob/73269ee/src/MangaDex/MangaDex.ts#L200">src/MangaDex/MangaDex.ts:200</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -541,7 +558,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/Paperback-iOS/extensions-promises/blob/8471557/src/MangaDex/MangaDex.ts#L188">src/MangaDex/MangaDex.ts:188</a></li>
+									<li>Defined in <a href="https://github.com/Paperback-iOS/extensions-promises/blob/73269ee/src/MangaDex/MangaDex.ts#L188">src/MangaDex/MangaDex.ts:188</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -565,7 +582,7 @@
 							<aside class="tsd-sources">
 								<p>Overrides Source.getMangaDetails</p>
 								<ul>
-									<li>Defined in <a href="https://github.com/Paperback-iOS/extensions-promises/blob/8471557/src/MangaDex/MangaDex.ts#L330">src/MangaDex/MangaDex.ts:330</a></li>
+									<li>Defined in <a href="https://github.com/Paperback-iOS/extensions-promises/blob/73269ee/src/MangaDex/MangaDex.ts#L330">src/MangaDex/MangaDex.ts:330</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -589,7 +606,7 @@
 							<aside class="tsd-sources">
 								<p>Overrides <a href="_mangapark_mangapark_.mangapark.html">MangaPark</a>.<a href="_mangapark_mangapark_.mangapark.html#getmangashareurl">getMangaShareUrl</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/Paperback-iOS/extensions-promises/blob/8471557/src/MangaDex/MangaDex.ts#L94">src/MangaDex/MangaDex.ts:94</a></li>
+									<li>Defined in <a href="https://github.com/Paperback-iOS/extensions-promises/blob/73269ee/src/MangaDex/MangaDex.ts#L94">src/MangaDex/MangaDex.ts:94</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -612,7 +629,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/Paperback-iOS/extensions-promises/blob/8471557/src/MangaDex/MangaDex.ts#L98">src/MangaDex/MangaDex.ts:98</a></li>
+									<li>Defined in <a href="https://github.com/Paperback-iOS/extensions-promises/blob/73269ee/src/MangaDex/MangaDex.ts#L98">src/MangaDex/MangaDex.ts:98</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -665,7 +682,7 @@
 							<aside class="tsd-sources">
 								<p>Overrides <a href="_guya_guya_.guya.html">Guya</a>.<a href="_guya_guya_.guya.html#getviewmoreitems">getViewMoreItems</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/Paperback-iOS/extensions-promises/blob/8471557/src/MangaDex/MangaDex.ts#L603">src/MangaDex/MangaDex.ts:603</a></li>
+									<li>Defined in <a href="https://github.com/Paperback-iOS/extensions-promises/blob/73269ee/src/MangaDex/MangaDex.ts#L603">src/MangaDex/MangaDex.ts:603</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -776,7 +793,7 @@
 							<aside class="tsd-sources">
 								<p>Overrides Source.searchRequest</p>
 								<ul>
-									<li>Defined in <a href="https://github.com/Paperback-iOS/extensions-promises/blob/8471557/src/MangaDex/MangaDex.ts#L495">src/MangaDex/MangaDex.ts:495</a></li>
+									<li>Defined in <a href="https://github.com/Paperback-iOS/extensions-promises/blob/73269ee/src/MangaDex/MangaDex.ts#L495">src/MangaDex/MangaDex.ts:495</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -838,7 +855,7 @@
 					<div class="tsd-signature tsd-kind-icon">language<wbr>Mapping<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">object</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/Paperback-iOS/extensions-promises/blob/8471557/src/MangaDex/MangaDex.ts#L46">src/MangaDex/MangaDex.ts:46</a></li>
+							<li>Defined in <a href="https://github.com/Paperback-iOS/extensions-promises/blob/73269ee/src/MangaDex/MangaDex.ts#L46">src/MangaDex/MangaDex.ts:46</a></li>
 						</ul>
 					</aside>
 					<section class="tsd-panel tsd-member tsd-kind-variable tsd-parent-kind-object-literal">
@@ -847,7 +864,7 @@
 						<div class="tsd-signature tsd-kind-icon">bg<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> = &quot;bg&quot;</span></div>
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/Paperback-iOS/extensions-promises/blob/8471557/src/MangaDex/MangaDex.ts#L65">src/MangaDex/MangaDex.ts:65</a></li>
+								<li>Defined in <a href="https://github.com/Paperback-iOS/extensions-promises/blob/73269ee/src/MangaDex/MangaDex.ts#L65">src/MangaDex/MangaDex.ts:65</a></li>
 							</ul>
 						</aside>
 					</section>
@@ -857,7 +874,7 @@
 						<div class="tsd-signature tsd-kind-icon">cs<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> = &quot;cz&quot;</span></div>
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/Paperback-iOS/extensions-promises/blob/8471557/src/MangaDex/MangaDex.ts#L77">src/MangaDex/MangaDex.ts:77</a></li>
+								<li>Defined in <a href="https://github.com/Paperback-iOS/extensions-promises/blob/73269ee/src/MangaDex/MangaDex.ts#L77">src/MangaDex/MangaDex.ts:77</a></li>
 							</ul>
 						</aside>
 					</section>
@@ -867,7 +884,7 @@
 						<div class="tsd-signature tsd-kind-icon">da<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> = &quot;dk&quot;</span></div>
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/Paperback-iOS/extensions-promises/blob/8471557/src/MangaDex/MangaDex.ts#L85">src/MangaDex/MangaDex.ts:85</a></li>
+								<li>Defined in <a href="https://github.com/Paperback-iOS/extensions-promises/blob/73269ee/src/MangaDex/MangaDex.ts#L85">src/MangaDex/MangaDex.ts:85</a></li>
 							</ul>
 						</aside>
 					</section>
@@ -877,7 +894,7 @@
 						<div class="tsd-signature tsd-kind-icon">de<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> = &quot;de&quot;</span></div>
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/Paperback-iOS/extensions-promises/blob/8471557/src/MangaDex/MangaDex.ts#L61">src/MangaDex/MangaDex.ts:61</a></li>
+								<li>Defined in <a href="https://github.com/Paperback-iOS/extensions-promises/blob/73269ee/src/MangaDex/MangaDex.ts#L61">src/MangaDex/MangaDex.ts:61</a></li>
 							</ul>
 						</aside>
 					</section>
@@ -887,7 +904,7 @@
 						<div class="tsd-signature tsd-kind-icon">en<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> = &quot;gb&quot;</span></div>
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/Paperback-iOS/extensions-promises/blob/8471557/src/MangaDex/MangaDex.ts#L47">src/MangaDex/MangaDex.ts:47</a></li>
+								<li>Defined in <a href="https://github.com/Paperback-iOS/extensions-promises/blob/73269ee/src/MangaDex/MangaDex.ts#L47">src/MangaDex/MangaDex.ts:47</a></li>
 							</ul>
 						</aside>
 					</section>
@@ -897,7 +914,7 @@
 						<div class="tsd-signature tsd-kind-icon">es<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> = &quot;es&quot;</span></div>
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/Paperback-iOS/extensions-promises/blob/8471557/src/MangaDex/MangaDex.ts#L55">src/MangaDex/MangaDex.ts:55</a></li>
+								<li>Defined in <a href="https://github.com/Paperback-iOS/extensions-promises/blob/73269ee/src/MangaDex/MangaDex.ts#L55">src/MangaDex/MangaDex.ts:55</a></li>
 							</ul>
 						</aside>
 					</section>
@@ -907,7 +924,7 @@
 						<div class="tsd-signature tsd-kind-icon">es-<wbr>la<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> = &quot;es&quot;</span></div>
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/Paperback-iOS/extensions-promises/blob/8471557/src/MangaDex/MangaDex.ts#L51">src/MangaDex/MangaDex.ts:51</a></li>
+								<li>Defined in <a href="https://github.com/Paperback-iOS/extensions-promises/blob/73269ee/src/MangaDex/MangaDex.ts#L51">src/MangaDex/MangaDex.ts:51</a></li>
 							</ul>
 						</aside>
 					</section>
@@ -917,7 +934,7 @@
 						<div class="tsd-signature tsd-kind-icon">fi<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> = &quot;fi&quot;</span></div>
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/Paperback-iOS/extensions-promises/blob/8471557/src/MangaDex/MangaDex.ts#L86">src/MangaDex/MangaDex.ts:86</a></li>
+								<li>Defined in <a href="https://github.com/Paperback-iOS/extensions-promises/blob/73269ee/src/MangaDex/MangaDex.ts#L86">src/MangaDex/MangaDex.ts:86</a></li>
 							</ul>
 						</aside>
 					</section>
@@ -927,7 +944,7 @@
 						<div class="tsd-signature tsd-kind-icon">fr<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> = &quot;fr&quot;</span></div>
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/Paperback-iOS/extensions-promises/blob/8471557/src/MangaDex/MangaDex.ts#L50">src/MangaDex/MangaDex.ts:50</a></li>
+								<li>Defined in <a href="https://github.com/Paperback-iOS/extensions-promises/blob/73269ee/src/MangaDex/MangaDex.ts#L50">src/MangaDex/MangaDex.ts:50</a></li>
 							</ul>
 						</aside>
 					</section>
@@ -937,7 +954,7 @@
 						<div class="tsd-signature tsd-kind-icon">hu<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> = &quot;hu&quot;</span></div>
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/Paperback-iOS/extensions-promises/blob/8471557/src/MangaDex/MangaDex.ts#L58">src/MangaDex/MangaDex.ts:58</a></li>
+								<li>Defined in <a href="https://github.com/Paperback-iOS/extensions-promises/blob/73269ee/src/MangaDex/MangaDex.ts#L58">src/MangaDex/MangaDex.ts:58</a></li>
 							</ul>
 						</aside>
 					</section>
@@ -947,7 +964,7 @@
 						<div class="tsd-signature tsd-kind-icon">id<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> = &quot;id&quot;</span></div>
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/Paperback-iOS/extensions-promises/blob/8471557/src/MangaDex/MangaDex.ts#L56">src/MangaDex/MangaDex.ts:56</a></li>
+								<li>Defined in <a href="https://github.com/Paperback-iOS/extensions-promises/blob/73269ee/src/MangaDex/MangaDex.ts#L56">src/MangaDex/MangaDex.ts:56</a></li>
 							</ul>
 						</aside>
 					</section>
@@ -957,7 +974,7 @@
 						<div class="tsd-signature tsd-kind-icon">it<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> = &quot;it&quot;</span></div>
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/Paperback-iOS/extensions-promises/blob/8471557/src/MangaDex/MangaDex.ts#L54">src/MangaDex/MangaDex.ts:54</a></li>
+								<li>Defined in <a href="https://github.com/Paperback-iOS/extensions-promises/blob/73269ee/src/MangaDex/MangaDex.ts#L54">src/MangaDex/MangaDex.ts:54</a></li>
 							</ul>
 						</aside>
 					</section>
@@ -967,7 +984,7 @@
 						<div class="tsd-signature tsd-kind-icon">ja<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> = &quot;jp&quot;</span></div>
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/Paperback-iOS/extensions-promises/blob/8471557/src/MangaDex/MangaDex.ts#L73">src/MangaDex/MangaDex.ts:73</a></li>
+								<li>Defined in <a href="https://github.com/Paperback-iOS/extensions-promises/blob/73269ee/src/MangaDex/MangaDex.ts#L73">src/MangaDex/MangaDex.ts:73</a></li>
 							</ul>
 						</aside>
 					</section>
@@ -977,7 +994,7 @@
 						<div class="tsd-signature tsd-kind-icon">ko<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> = &quot;kr&quot;</span></div>
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/Paperback-iOS/extensions-promises/blob/8471557/src/MangaDex/MangaDex.ts#L74">src/MangaDex/MangaDex.ts:74</a></li>
+								<li>Defined in <a href="https://github.com/Paperback-iOS/extensions-promises/blob/73269ee/src/MangaDex/MangaDex.ts#L74">src/MangaDex/MangaDex.ts:74</a></li>
 							</ul>
 						</aside>
 					</section>
@@ -987,7 +1004,7 @@
 						<div class="tsd-signature tsd-kind-icon">lt<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> = &quot;lt&quot;</span></div>
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/Paperback-iOS/extensions-promises/blob/8471557/src/MangaDex/MangaDex.ts#L83">src/MangaDex/MangaDex.ts:83</a></li>
+								<li>Defined in <a href="https://github.com/Paperback-iOS/extensions-promises/blob/73269ee/src/MangaDex/MangaDex.ts#L83">src/MangaDex/MangaDex.ts:83</a></li>
 							</ul>
 						</aside>
 					</section>
@@ -997,7 +1014,7 @@
 						<div class="tsd-signature tsd-kind-icon">mn<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> = &quot;mn&quot;</span></div>
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/Paperback-iOS/extensions-promises/blob/8471557/src/MangaDex/MangaDex.ts#L68">src/MangaDex/MangaDex.ts:68</a></li>
+								<li>Defined in <a href="https://github.com/Paperback-iOS/extensions-promises/blob/73269ee/src/MangaDex/MangaDex.ts#L68">src/MangaDex/MangaDex.ts:68</a></li>
 							</ul>
 						</aside>
 					</section>
@@ -1007,7 +1024,7 @@
 						<div class="tsd-signature tsd-kind-icon">ms<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> = &quot;my&quot;</span></div>
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/Paperback-iOS/extensions-promises/blob/8471557/src/MangaDex/MangaDex.ts#L71">src/MangaDex/MangaDex.ts:71</a></li>
+								<li>Defined in <a href="https://github.com/Paperback-iOS/extensions-promises/blob/73269ee/src/MangaDex/MangaDex.ts#L71">src/MangaDex/MangaDex.ts:71</a></li>
 							</ul>
 						</aside>
 					</section>
@@ -1017,7 +1034,7 @@
 						<div class="tsd-signature tsd-kind-icon">nl<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> = &quot;nl&quot;</span></div>
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/Paperback-iOS/extensions-promises/blob/8471557/src/MangaDex/MangaDex.ts#L79">src/MangaDex/MangaDex.ts:79</a></li>
+								<li>Defined in <a href="https://github.com/Paperback-iOS/extensions-promises/blob/73269ee/src/MangaDex/MangaDex.ts#L79">src/MangaDex/MangaDex.ts:79</a></li>
 							</ul>
 						</aside>
 					</section>
@@ -1027,7 +1044,7 @@
 						<div class="tsd-signature tsd-kind-icon">no<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> = &quot;no&quot;</span></div>
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/Paperback-iOS/extensions-promises/blob/8471557/src/MangaDex/MangaDex.ts#L82">src/MangaDex/MangaDex.ts:82</a></li>
+								<li>Defined in <a href="https://github.com/Paperback-iOS/extensions-promises/blob/73269ee/src/MangaDex/MangaDex.ts#L82">src/MangaDex/MangaDex.ts:82</a></li>
 							</ul>
 						</aside>
 					</section>
@@ -1037,7 +1054,7 @@
 						<div class="tsd-signature tsd-kind-icon">pl<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> = &quot;pl&quot;</span></div>
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/Paperback-iOS/extensions-promises/blob/8471557/src/MangaDex/MangaDex.ts#L52">src/MangaDex/MangaDex.ts:52</a></li>
+								<li>Defined in <a href="https://github.com/Paperback-iOS/extensions-promises/blob/73269ee/src/MangaDex/MangaDex.ts#L52">src/MangaDex/MangaDex.ts:52</a></li>
 							</ul>
 						</aside>
 					</section>
@@ -1047,7 +1064,7 @@
 						<div class="tsd-signature tsd-kind-icon">pt<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> = &quot;pt&quot;</span></div>
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/Paperback-iOS/extensions-promises/blob/8471557/src/MangaDex/MangaDex.ts#L78">src/MangaDex/MangaDex.ts:78</a></li>
+								<li>Defined in <a href="https://github.com/Paperback-iOS/extensions-promises/blob/73269ee/src/MangaDex/MangaDex.ts#L78">src/MangaDex/MangaDex.ts:78</a></li>
 							</ul>
 						</aside>
 					</section>
@@ -1057,7 +1074,7 @@
 						<div class="tsd-signature tsd-kind-icon">pt-<wbr>br<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> = &quot;pt&quot;</span></div>
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/Paperback-iOS/extensions-promises/blob/8471557/src/MangaDex/MangaDex.ts#L48">src/MangaDex/MangaDex.ts:48</a></li>
+								<li>Defined in <a href="https://github.com/Paperback-iOS/extensions-promises/blob/73269ee/src/MangaDex/MangaDex.ts#L48">src/MangaDex/MangaDex.ts:48</a></li>
 							</ul>
 						</aside>
 					</section>
@@ -1067,7 +1084,7 @@
 						<div class="tsd-signature tsd-kind-icon">ro<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> = &quot;ro&quot;</span></div>
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/Paperback-iOS/extensions-promises/blob/8471557/src/MangaDex/MangaDex.ts#L70">src/MangaDex/MangaDex.ts:70</a></li>
+								<li>Defined in <a href="https://github.com/Paperback-iOS/extensions-promises/blob/73269ee/src/MangaDex/MangaDex.ts#L70">src/MangaDex/MangaDex.ts:70</a></li>
 							</ul>
 						</aside>
 					</section>
@@ -1077,7 +1094,7 @@
 						<div class="tsd-signature tsd-kind-icon">ru<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> = &quot;ru&quot;</span></div>
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/Paperback-iOS/extensions-promises/blob/8471557/src/MangaDex/MangaDex.ts#L49">src/MangaDex/MangaDex.ts:49</a></li>
+								<li>Defined in <a href="https://github.com/Paperback-iOS/extensions-promises/blob/73269ee/src/MangaDex/MangaDex.ts#L49">src/MangaDex/MangaDex.ts:49</a></li>
 							</ul>
 						</aside>
 					</section>
@@ -1087,7 +1104,7 @@
 						<div class="tsd-signature tsd-kind-icon">th<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> = &quot;th&quot;</span></div>
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/Paperback-iOS/extensions-promises/blob/8471557/src/MangaDex/MangaDex.ts#L64">src/MangaDex/MangaDex.ts:64</a></li>
+								<li>Defined in <a href="https://github.com/Paperback-iOS/extensions-promises/blob/73269ee/src/MangaDex/MangaDex.ts#L64">src/MangaDex/MangaDex.ts:64</a></li>
 							</ul>
 						</aside>
 					</section>
@@ -1097,7 +1114,7 @@
 						<div class="tsd-signature tsd-kind-icon">tr<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> = &quot;tr&quot;</span></div>
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/Paperback-iOS/extensions-promises/blob/8471557/src/MangaDex/MangaDex.ts#L53">src/MangaDex/MangaDex.ts:53</a></li>
+								<li>Defined in <a href="https://github.com/Paperback-iOS/extensions-promises/blob/73269ee/src/MangaDex/MangaDex.ts#L53">src/MangaDex/MangaDex.ts:53</a></li>
 							</ul>
 						</aside>
 					</section>
@@ -1107,7 +1124,7 @@
 						<div class="tsd-signature tsd-kind-icon">uk<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> = &quot;ua&quot;</span></div>
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/Paperback-iOS/extensions-promises/blob/8471557/src/MangaDex/MangaDex.ts#L67">src/MangaDex/MangaDex.ts:67</a></li>
+								<li>Defined in <a href="https://github.com/Paperback-iOS/extensions-promises/blob/73269ee/src/MangaDex/MangaDex.ts#L67">src/MangaDex/MangaDex.ts:67</a></li>
 							</ul>
 						</aside>
 					</section>
@@ -1117,7 +1134,7 @@
 						<div class="tsd-signature tsd-kind-icon">vi<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> = &quot;vn&quot;</span></div>
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/Paperback-iOS/extensions-promises/blob/8471557/src/MangaDex/MangaDex.ts#L57">src/MangaDex/MangaDex.ts:57</a></li>
+								<li>Defined in <a href="https://github.com/Paperback-iOS/extensions-promises/blob/73269ee/src/MangaDex/MangaDex.ts#L57">src/MangaDex/MangaDex.ts:57</a></li>
 							</ul>
 						</aside>
 					</section>
@@ -1127,7 +1144,7 @@
 						<div class="tsd-signature tsd-kind-icon">zh<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> = &quot;cn&quot;</span></div>
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/Paperback-iOS/extensions-promises/blob/8471557/src/MangaDex/MangaDex.ts#L59">src/MangaDex/MangaDex.ts:59</a></li>
+								<li>Defined in <a href="https://github.com/Paperback-iOS/extensions-promises/blob/73269ee/src/MangaDex/MangaDex.ts#L59">src/MangaDex/MangaDex.ts:59</a></li>
 							</ul>
 						</aside>
 					</section>
@@ -1137,7 +1154,7 @@
 						<div class="tsd-signature tsd-kind-icon">zh-<wbr>hk<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> = &quot;hk&quot;</span></div>
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/Paperback-iOS/extensions-promises/blob/8471557/src/MangaDex/MangaDex.ts#L62">src/MangaDex/MangaDex.ts:62</a></li>
+								<li>Defined in <a href="https://github.com/Paperback-iOS/extensions-promises/blob/73269ee/src/MangaDex/MangaDex.ts#L62">src/MangaDex/MangaDex.ts:62</a></li>
 							</ul>
 						</aside>
 					</section>
@@ -1177,7 +1194,7 @@
 							<li class=" tsd-kind-method tsd-parent-kind-class">
 								<a href="_mangadex_mangadex_.mangadex.html#decodehtmlentity" class="tsd-kind-icon">decodeHTMLEntity</a>
 							</li>
-							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-overwrite">
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
 								<a href="_mangadex_mangadex_.mangadex.html#filterupdatedmanga" class="tsd-kind-icon">filter<wbr>Updated<wbr>Manga</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
