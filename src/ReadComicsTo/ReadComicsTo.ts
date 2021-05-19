@@ -11,6 +11,7 @@ import {
     SourceInfo,
     TagSection,
     TagType,
+    ContentRating,
 } from "paperback-extensions-common"
 
 import {Parser,} from './Parser'
@@ -24,7 +25,7 @@ export const ReadComicsToInfo: SourceInfo = {
     author: 'Aurora',
     authorWebsite: 'https://github.com/Aur0raN',
     icon: "logo.png",
-    hentaiSource: false,
+    contentRating: ContentRating.EVERYONE,
     websiteBaseURL: READCOMICSTO_DOMAIN,
     sourceTags: []
 }
@@ -42,7 +43,7 @@ export class ReadComicsTo extends Source {
     parser = new Parser()
 
 
-    getMangaShareUrl(mangaId: string): string | null {
+    getMangaShareUrl(mangaId: string): string {
         return `${READCOMICSTO_DOMAIN}/Comic/${mangaId}`
     }
 
@@ -203,7 +204,7 @@ export class ReadComicsTo extends Source {
     }
 
 
-    async getViewMoreItems(homepageSectionId: string, metadata: any): Promise<PagedResults | null> {
+    async getViewMoreItems(homepageSectionId: string, metadata: any): Promise<PagedResults> {
         let webPage = ''
         let page: number = metadata?.page ?? 1
         switch (homepageSectionId) {
@@ -220,7 +221,7 @@ export class ReadComicsTo extends Source {
                 break
             }
             default:
-                return Promise.resolve(null)
+                throw new Error(`Failed to getViewMoreItems, a section ID was passed in which doesn't exist`)
         }
 
         let request = createRequestObject({
@@ -291,6 +292,14 @@ export class ReadComicsTo extends Source {
             data: this.urlEncodeObject(data),
         })
     }
+
+    urlEncodeObject(obj: { [x: string]: any }): any {
+        let ret: any = {}
+        for (const entry of Object.entries(obj)) {
+            ret[encodeURIComponent(entry[0])] = encodeURIComponent(entry[1])
+        }
+        return ret
+      }
 
     getCloudflareBypassRequest() {
         return createRequestObject({

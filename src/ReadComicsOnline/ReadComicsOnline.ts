@@ -10,7 +10,8 @@ import {
   LanguageCode,
   TagSection,
   PagedResults,
-  SourceInfo
+  SourceInfo,
+  ContentRating
 } from "paperback-extensions-common"
 
 const READCOMICSONLINE_DOMAIN = 'https://readcomicsonline.ru'
@@ -22,12 +23,17 @@ export const ReadComicsOnlineInfo: SourceInfo = {
   author: 'Conrad Weiser',
   authorWebsite: 'http://github.com/conradweiser',
   icon: "logo.png", // The website has SVG versions, I had to find one off of a different source
-  hentaiSource: false,
+  contentRating: ContentRating.EVERYONE,
   websiteBaseURL: READCOMICSONLINE_DOMAIN,
 }
 
 export class ReadComicsOnline extends Source {
-  getMangaShareUrl(mangaId: string): string | null { return `${READCOMICSONLINE_DOMAIN}/comic/${mangaId}` }
+
+  requestManager = createRequestManager({
+    requestsPerSecond: 2
+  })
+
+  getMangaShareUrl(mangaId: string): string { return `${READCOMICSONLINE_DOMAIN}/comic/${mangaId}` }
 
   async getMangaDetails(mangaId: string): Promise<Manga> {
 

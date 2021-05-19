@@ -10,7 +10,8 @@ import {
   SourceInfo,
   MangaUpdates,
   RequestHeaders,
-  TagType
+  TagType,
+  ContentRating
 } from "paperback-extensions-common"
 
 import {
@@ -23,9 +24,7 @@ import {
   parseMangakakalotMangaDetails,
   parseSearch,
   parseTags,
-  /*parseUpdatedManga,*/
   parseViewMore,
-  /*UpdatedManga*/
 } from "./MangakakalotParser"
 
 import {
@@ -49,7 +48,7 @@ export const MangakakalotInfo: SourceInfo = {
   author: 'getBoolean',
   authorWebsite: 'https://github.com/getBoolean',
   description: 'Extension that pulls manga from Mangakakalot',
-  hentaiSource: false,
+  contentRating: ContentRating.MATURE,
   websiteBaseURL: MK_DOMAIN,
   sourceTags: [
     {
@@ -60,7 +59,12 @@ export const MangakakalotInfo: SourceInfo = {
 }
 
 export class Mangakakalot extends Source {
-  getMangaShareUrl(mangaId: string): string | null { return `${mangaId}/` }
+
+  requestManager = createRequestManager({
+    requestsPerSecond: 2
+})
+
+  getMangaShareUrl(mangaId: string): string { return `${mangaId}/` }
 
   async getMangaDetails(mangaId: string): Promise<Manga> {
     let idTemp = mangaId.slice(mangaId.indexOf('/', mangaId.indexOf('/') + 2), mangaId.length)
@@ -213,7 +217,7 @@ export class Mangakakalot extends Source {
     })
   }
 
-  async getTags(): Promise<TagSection[] | null> {
+  async getTags(): Promise<TagSection[]> {
     const request = createRequestObject({
       url: MK_DOMAIN,
       method,
@@ -222,10 +226,11 @@ export class Mangakakalot extends Source {
 
     const response = await this.requestManager.schedule(request, 1)
     const $ = this.cheerio.load(response.data)
-    return parseTags($)
+    const tags = parseTags($)
+    return tags ? tags : []
   }
 
-  async getViewMoreItems(homepageSectionId: string, metadata: any): Promise<PagedResults | null> {
+  async getViewMoreItems(homepageSectionId: string, metadata: any): Promise<PagedResults> {
     let page: number = metadata?.page ?? 1
     let param = ''
     switch (homepageSectionId) {
@@ -243,7 +248,7 @@ export class Mangakakalot extends Source {
         param = `/manga_list?type=newest&category=all&state=Completed&page=${page}`
         break;
       default:
-        return Promise.resolve(null)
+        throw new Error(`Requested to getViewMoreItems for a section ID which doesn't exist`)
     }
 
     const request = createRequestObject({

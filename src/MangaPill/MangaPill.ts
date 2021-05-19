@@ -1,6 +1,7 @@
 import {
     Chapter,
     ChapterDetails,
+    ContentRating,
     HomeSection,
     Manga,
     MangaUpdates,
@@ -23,7 +24,7 @@ export const MangaPillInfo: SourceInfo = {
     author: 'GameFuzzy',
     authorWebsite: 'http://github.com/gamefuzzy',
     icon: "icon.png",
-    hentaiSource: false,
+    contentRating: ContentRating.MATURE,
     websiteBaseURL: MANGAPILL_DOMAIN,
     sourceTags: [
         {
@@ -38,9 +39,14 @@ export const MangaPillInfo: SourceInfo = {
 }
 
 export class MangaPill extends Source {
+
+    requestManager = createRequestManager({
+        requestsPerSecond: 2
+      })
+
     parser = new Parser()
 
-    getMangaShareUrl(mangaId: string): string | null {
+    getMangaShareUrl(mangaId: string): string {
         return `${MANGAPILL_DOMAIN}/manga/${mangaId}`
     }
 
@@ -153,7 +159,7 @@ export class MangaPill extends Source {
     }
 
 
-    async getTags(): Promise<TagSection[] | null> {
+    async getTags(): Promise<TagSection[]> {
         const request = createRequestObject({
             url: `${MANGAPILL_DOMAIN}/search`,
             method: 'GET'
@@ -215,7 +221,7 @@ export class MangaPill extends Source {
         await Promise.all(promises)
     }
 
-    async getViewMoreItems(homepageSectionId: string, metadata: any): Promise<PagedResults | null> {
+    async getViewMoreItems(homepageSectionId: string, metadata: any): Promise<PagedResults> {
         let page: number = metadata?.page ?? 1
         let manga
         let mData = undefined
@@ -250,7 +256,7 @@ export class MangaPill extends Source {
                 break
             }
             default:
-                return Promise.resolve(null)
+                throw new Error(`Attempted to get viewMore items for a section ID which doesn't exist`)
         }
 
         return createPagedResults({

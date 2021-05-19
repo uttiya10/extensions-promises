@@ -10,7 +10,8 @@ import {
   SourceInfo,
   MangaUpdates,
   TagType,
-  RequestHeaders
+  RequestHeaders,
+  ContentRating
 } from "paperback-extensions-common"
 import { parseChapterDetails, parseChapters, parseHomeSections, parseMangaDetails, parseSearch, parseTags, parseUpdatedManga, parseViewMore, searchMetadata } from "./MangaLifeParsing"
 
@@ -25,7 +26,7 @@ export const MangaLifeInfo: SourceInfo = {
   author: 'Daniel Kovalevich',
   authorWebsite: 'https://github.com/DanielKovalevich',
   description: 'Extension that pulls manga from MangaLife, includes Advanced Search and Updated manga fetching',
-  hentaiSource: false,
+  contentRating: ContentRating.MATURE,
   websiteBaseURL: ML_DOMAIN,
   sourceTags: [
     {
@@ -40,7 +41,12 @@ export const MangaLifeInfo: SourceInfo = {
 }
 
 export class MangaLife extends Source {
-  getMangaShareUrl(mangaId: string): string | null { return `${ML_DOMAIN}/manga/${mangaId}` }
+
+  requestManager = createRequestManager({
+    requestsPerSecond: 2
+  })
+
+  getMangaShareUrl(mangaId: string): string { return `${ML_DOMAIN}/manga/${mangaId}` }
 
   async getMangaDetails(mangaId: string): Promise<Manga> {
     const request = createRequestObject({
@@ -104,7 +110,7 @@ export class MangaLife extends Source {
     return parseSearch(response.data, metadata)
   }
 
-  async getTags(): Promise<TagSection[] | null> {
+  async getTags(): Promise<TagSection[]> {
     const request = createRequestObject({
       url: `${ML_DOMAIN}/search/`,
       method,
@@ -126,7 +132,7 @@ export class MangaLife extends Source {
     parseHomeSections($, response.data, sectionCallback);
   }
 
-  async getViewMoreItems(homepageSectionId: string, _metadata: any): Promise<PagedResults | null> {
+  async getViewMoreItems(homepageSectionId: string, _metadata: any): Promise<PagedResults> {
     const request = createRequestObject({
       url: ML_DOMAIN,
       method,

@@ -9,7 +9,8 @@ import {
   MangaStatus,
   MangaUpdates,
   PagedResults,
-  SourceInfo
+  SourceInfo,
+  ContentRating
 } from "paperback-extensions-common"
 
 const GUYA_API_BASE = "https://guya.moe"
@@ -26,11 +27,16 @@ export const GuyaInfo: SourceInfo = {
   authorWebsite: "https://github.com/funkyhippo",
   description: "Extension that pulls manga from guya.moe",
   language: GUYA_LANG,
-  hentaiSource: false,
+  contentRating: ContentRating.MATURE,
   websiteBaseURL: GUYA_API_BASE
 }
 
 export class Guya extends Source {
+
+  requestManager = createRequestManager({
+    requestsPerSecond: 2
+  })
+
   async getMangaDetails(mangaId: string): Promise<Manga> {
 
     let request = createRequestObject({

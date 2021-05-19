@@ -1,6 +1,7 @@
 import {
     Chapter,
     ChapterDetails,
+    ContentRating,
     HomeSection,
     Manga,
     MangaUpdates,
@@ -23,20 +24,25 @@ export const BatoToInfo: SourceInfo = {
     author: 'GameFuzzy',
     authorWebsite: 'http://github.com/gamefuzzy',
     icon: "icon.png",
-    hentaiSource: false,
     websiteBaseURL: BATOTO_DOMAIN,
     sourceTags: [
         {
             text: "Notifications",
             type: TagType.GREEN
         }
-    ]
+    ],
+    contentRating: ContentRating.MATURE
 }
 
 export class BatoTo extends Source {
+    
+    requestManager = createRequestManager({
+        requestsPerSecond: 2
+    })
+
     parser = new Parser()
 
-    getMangaShareUrl(mangaId: string): string | null {
+    getMangaShareUrl(mangaId: string): string {
         return `${BATOTO_DOMAIN}/series/${mangaId}`
     }
 
@@ -141,7 +147,7 @@ export class BatoTo extends Source {
     }
 
 
-    async getTags(): Promise<TagSection[] | null> {
+    async getTags(): Promise<TagSection[]> {
         const request = createRequestObject({
             url: `${BATOTO_DOMAIN}/browse`,
             method: 'GET'
@@ -213,7 +219,7 @@ export class BatoTo extends Source {
     }
 
 
-    async getViewMoreItems(homepageSectionId: string, metadata: any): Promise<PagedResults | null> {
+    async getViewMoreItems(homepageSectionId: string, metadata: any): Promise<PagedResults> {
         let webPage = ''
         let page: number = metadata?.page ?? 1
         switch (homepageSectionId) {
@@ -230,7 +236,7 @@ export class BatoTo extends Source {
                 break
             }
             default:
-                return Promise.resolve(null)
+                throw new Error(`Requested to getViewMoreItems for a section ID which doesn't exist`)
         }
 
         let request = createRequestObject({

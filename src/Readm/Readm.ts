@@ -10,7 +10,8 @@ import {
   MangaUpdates,
   TagType,
   TagSection,
-  MangaTile
+  MangaTile,
+  ContentRating
 } from "paperback-extensions-common"
 import { parseUpdatedManga, generateSearch, parseChapterDetails, isLastPage, parseTags, parseChapters, parseHomeSections, parseMangaDetails, parseViewMore, UpdatedManga } from "./ReadmParser"
 
@@ -24,7 +25,7 @@ export const ReadmInfo: SourceInfo = {
   author: 'Netsky',
   authorWebsite: 'https://github.com/TheNetsky',
   description: 'Extension that pulls manga from Readm.',
-  hentaiSource: false,
+  contentRating: ContentRating.MATURE,
   websiteBaseURL: RM_DOMAIN,
   sourceTags: [
     {
@@ -35,7 +36,12 @@ export const ReadmInfo: SourceInfo = {
 }
 
 export class Readm extends Source {
-  getMangaShareUrl(mangaId: string): string | null { return `${RM_DOMAIN}/manga/${mangaId}` }
+
+  requestManager = createRequestManager({
+    requestsPerSecond: 2
+  })
+
+  getMangaShareUrl(mangaId: string): string { return `${RM_DOMAIN}/manga/${mangaId}` }
 
   async getMangaDetails(mangaId: string): Promise<Manga> {
     const request = createRequestObject({
@@ -73,7 +79,7 @@ export class Readm extends Source {
     return parseChapterDetails($, mangaId, chapterId);
   }
 
-  async getTags(): Promise<TagSection[] | null> {
+  async getTags(): Promise<TagSection[]> {
     const request = createRequestObject({
       url: RM_DOMAIN,
       method,
@@ -81,7 +87,8 @@ export class Readm extends Source {
 
     const response = await this.requestManager.schedule(request, 1);
     const $ = this.cheerio.load(response.data);
-    return parseTags($);
+    const tags = parseTags($);
+    return tags ? tags : []
   }
 
   async filterUpdatedManga(mangaUpdatesFoundCallback: (updates: MangaUpdates) => void, time: Date, ids: string[]): Promise<void> {
@@ -126,7 +133,7 @@ export class Readm extends Source {
     parseHomeSections($, sections, sectionCallback);
   }
 
-  async getViewMoreItems(homepageSectionId: string, metadata: any): Promise<PagedResults | null> {
+  async getViewMoreItems(homepageSectionId: string, metadata: any): Promise<PagedResults> {
     let page: number = metadata?.page ?? 1;
     let param = "";
     switch (homepageSectionId) {
@@ -137,7 +144,7 @@ export class Readm extends Source {
         param = `/latest-releases/${page}`;
         break;
       default:
-        return Promise.resolve(null);;
+        throw new Error(`Requested to getViewMoreItems with a sectionID which doesn't exist`)
     }
 
     const request = createRequestObject({

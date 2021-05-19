@@ -10,7 +10,8 @@ import {
   SourceInfo,
   MangaUpdates,
   RequestHeaders,
-  TagType
+  TagType,
+  ContentRating
 } from "paperback-extensions-common"
 import { generateSearch, isLastPage, parseChapterDetails, parseChapters, parseHomeSections, parseMangaDetails, parseSearch, parseTags, parseUpdatedManga, parseViewMore, UpdatedManga } from "./ManganeloParser"
 
@@ -27,7 +28,7 @@ export const ManganeloInfo: SourceInfo = {
   author: 'Daniel Kovalevich',
   authorWebsite: 'https://github.com/DanielKovalevich',
   description: 'Extension that pulls manga from Manganelo, includes Advanced Search and Updated manga fetching',
-  hentaiSource: false,
+  contentRating: ContentRating.MATURE,
   websiteBaseURL: MN_DOMAIN,
   sourceTags: [
     {
@@ -38,7 +39,12 @@ export const ManganeloInfo: SourceInfo = {
 }
 
 export class Manganelo extends Source {
-  getMangaShareUrl(mangaId: string): string | null { return `${MN_DOMAIN}/manga/${mangaId}` }
+
+  requestManager = createRequestManager({
+    requestsPerSecond: 2
+  })
+
+  getMangaShareUrl(mangaId: string): string { return `${MN_DOMAIN}/manga/${mangaId}` }
 
   async getMangaDetails(mangaId: string): Promise<Manga> {
     const request = createRequestObject({
@@ -146,7 +152,7 @@ export class Manganelo extends Source {
     })
   }
 
-  async getTags(): Promise<TagSection[] | null> {
+  async getTags(): Promise<TagSection[]> {
     const request = createRequestObject({
       url: `${MN_DOMAIN}/advanced_search?`,
       method,
@@ -155,17 +161,18 @@ export class Manganelo extends Source {
 
     const response = await this.requestManager.schedule(request, 1)
     const $ = this.cheerio.load(response.data)
-    return parseTags($)
+    const tags = parseTags($)
+    return tags ? tags : []
   }
 
-  async getViewMoreItems(homepageSectionId: string, metadata: any): Promise<PagedResults | null> {
+  async getViewMoreItems(homepageSectionId: string, metadata: any): Promise<PagedResults> {
     let page : number = metadata?.page ?? 1
     let param = ''
     if (homepageSectionId === 'latest_updates')
       param = `/genre-all/${page}`
     else if (homepageSectionId === 'new_manga')
       param = `/genre-all/${page}?type=newest`
-    else return Promise.resolve(null)
+    else throw new Error(`Requested to getViewMoreItems for a section ID which doesn't exist`)
 
     const request = createRequestObject({
       url: `${MN_DOMAIN}`,

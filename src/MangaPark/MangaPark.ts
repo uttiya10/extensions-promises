@@ -9,7 +9,8 @@ import {
 	MangaUpdates, 
 	PagedResults, 
 	SourceInfo, 
-	TagType } 
+	TagType, 
+	ContentRating} 
 from "paperback-extensions-common"
 import { generateSearch, parseChapterDetails, parseChapters, parseHomeSections, parseMangaDetails, parseSearch, parseTags, parseUpdatedManga,  parseViewMore,  UpdatedManga } from "./MangaParkParser"
 
@@ -23,7 +24,7 @@ export const MangaParkInfo: SourceInfo = {
 	author: 'Daniel Kovalevich',
 	authorWebsite: 'https://github.com/DanielKovalevich',
 	description: 'Extension that pulls manga from MangaPark, includes Advanced Search and Updated manga fetching',
-	hentaiSource: false,
+	contentRating: ContentRating.MATURE,
 	websiteBaseURL: MP_DOMAIN,
 	sourceTags: [
 		{
@@ -34,6 +35,11 @@ export const MangaParkInfo: SourceInfo = {
 }
 
 export class MangaPark extends Source {
+
+	requestManager = createRequestManager({
+		requestsPerSecond: 2
+	  })
+
 	readonly cookies = [createCookie({ name: 'set', value: 'h=1', domain: MP_DOMAIN })]
 	cloudflareBypassRequest() {
 		return createRequestObject({
@@ -116,7 +122,7 @@ export class MangaPark extends Source {
 		parseHomeSections($, sections, sectionCallback)
 	}
 
-	async getViewMoreItems(homepageSectionId: string, metadata: any): Promise<PagedResults | null> {
+	async getViewMoreItems(homepageSectionId: string, metadata: any): Promise<PagedResults> {
 		let page : number = metadata?.page ?? 1
 		let param = ''
 		if (homepageSectionId === 'popular_titles')
@@ -125,7 +131,7 @@ export class MangaPark extends Source {
 			param = `/search?orderby=views&page=${page}`
 		else if (homepageSectionId === 'recently_updated')
 			param = `/latest/${page}`
-		else return Promise.resolve(null)
+		else throw new Error(`Requested to getViewMoreItems for a section ID which doesn't exist`)
 
 		const request = createRequestObject({
 			url: `${MP_DOMAIN}`,
@@ -163,7 +169,7 @@ export class MangaPark extends Source {
 		})
 	}
 
-	async getTags(): Promise<TagSection[] | null> {
+	async getTags(): Promise<TagSection[]> {
 		const request = createRequestObject({
 			url: `${MP_DOMAIN}/search?`,
 			method,
@@ -172,6 +178,7 @@ export class MangaPark extends Source {
 
 		const response = await this.requestManager.schedule(request, 1)
 		const $ = this.cheerio.load(response.data)
-		return parseTags($)
+		const tags = parseTags($)
+		return tags ? tags : []
 	}
 }

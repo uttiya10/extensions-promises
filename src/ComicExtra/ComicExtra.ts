@@ -1,10 +1,12 @@
 import {
     Chapter,
     ChapterDetails,
+    ContentRating,
     HomeSection,
     Manga,
     MangaUpdates,
     PagedResults,
+    RequestManager,
     SearchRequest,
     Source,
     SourceInfo,
@@ -23,7 +25,7 @@ export const ComicExtraInfo: SourceInfo = {
     author: 'GameFuzzy',
     authorWebsite: 'http://github.com/gamefuzzy',
     icon: "icon.png",
-    hentaiSource: false,
+    contentRating: ContentRating.EVERYONE,
     websiteBaseURL: COMICEXTRA_DOMAIN,
     sourceTags: [
         {
@@ -34,9 +36,13 @@ export const ComicExtraInfo: SourceInfo = {
 }
 
 export class ComicExtra extends Source {
+
+    requestManager = createRequestManager({
+        requestsPerSecond: 2
+    })
     parser = new Parser()
 
-    getMangaShareUrl(mangaId: string): string | null {
+    getMangaShareUrl(mangaId: string): string {
         return `${COMICEXTRA_DOMAIN}/comic/${mangaId}`
     }
 
@@ -182,7 +188,7 @@ export class ComicExtra extends Source {
     }
 
 
-    async getTags(): Promise<TagSection[] | null> {
+    async getTags(): Promise<TagSection[]> {
         const request = createRequestObject({
             url: `${COMICEXTRA_DOMAIN}/comic-genres/`,
             method: 'GET'
@@ -241,7 +247,7 @@ export class ComicExtra extends Source {
     }
 
 
-    async getViewMoreItems(homepageSectionId: string, metadata: any): Promise<PagedResults | null> {
+    async getViewMoreItems(homepageSectionId: string, metadata: any): Promise<PagedResults> {
         let webPage = ''
         let page: number = metadata?.page ?? 1
         switch (homepageSectionId) {
@@ -258,7 +264,7 @@ export class ComicExtra extends Source {
                 break
             }
             default:
-                return Promise.resolve(null)
+                throw new Error(`Requested to getViewMoreItems for a section ID which doesn't exist`)
         }
 
         let request = createRequestObject({

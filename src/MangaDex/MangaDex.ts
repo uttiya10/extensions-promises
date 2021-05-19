@@ -13,7 +13,8 @@ import {
   MangaUpdates,
   MangaStatus,
   MangaTile,
-  Tag
+  Tag,
+  ContentRating
 } from 'paperback-extensions-common'
 
 const MANGADEX_DOMAIN = 'https://mangadex.org'
@@ -27,7 +28,7 @@ export const MangaDexInfo: SourceInfo = {
   version: '1.0.2',
   authorWebsite: 'https://github.com/nar1n',
   websiteBaseURL: MANGADEX_DOMAIN,
-  hentaiSource: false,
+  contentRating: ContentRating.EVERYONE,
   language: LanguageCode.ENGLISH,
   sourceTags: [
     {
