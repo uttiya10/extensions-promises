@@ -30325,7 +30325,7 @@ const paperback_extensions_common_1 = require("paperback-extensions-common");
 const Parser_1 = require("./Parser");
 const BATOTO_DOMAIN = 'https://bato.to';
 exports.BatoToInfo = {
-    version: '1.1.7',
+    version: '1.1.8',
     name: 'Bato.To',
     description: 'Extension that pulls western comics from bato.to',
     author: 'GameFuzzy',
@@ -30369,7 +30369,7 @@ class BatoTo extends paperback_extensions_common_1.Source {
             const pageData = yield this.requestManager.schedule(pageRequest, 1);
             let $ = this.cheerio.load(pageData.data);
             chapters = chapters.concat(this.parser.parseChapterList($, mangaId, this));
-            return this.parser.sortChapters(chapters);
+            return (chapters);
         });
     }
     getChapterDetails(mangaId, chapterId) {
@@ -30724,22 +30724,24 @@ class Parser {
         });
     }
     parseChapterList($, mangaId, source) {
-        var _a, _b, _c, _d, _e;
         let chapters = [];
-        for (let obj of $('.item', $('.main')).toArray()) {
+        let theArray = $('.item', $('.main')).toArray().reverse();
+        theArray.forEach((obj, i) => {
+            var _a, _b, _c, _d, _e;
             let chapterTile = $('a', $(obj));
             let chapterId = (_a = chapterTile.attr('href')) === null || _a === void 0 ? void 0 : _a.replace(`/chapter/`, '');
             let chapGroup = (_b = $(chapterTile).text().trim().split('\n').pop()) === null || _b === void 0 ? void 0 : _b.trim();
-            let chapName = $('span', $(chapterTile)).first().text().replace(':', '').trim();
-            if (chapName == chapGroup)
-                chapName = '';
-            let chapter = $('b', chapterTile).text().toLowerCase();
-            let chapNum = Number((/(\d+)/).test(chapter) ? chapter.match(/(\d+)/)[0] : 0);
+            let chapNamePart1 = $('b', chapterTile).text();
+            let chapNamePart2 = $('span', $(chapterTile)).first().text().replace(':', '').trim();
+            if (chapNamePart2 == chapGroup)
+                chapNamePart2 = '';
+            let chapter = $('b', chapterTile).text();
+            let chapNum = i + 1;
             let volume = Number((_c = chapter === null || chapter === void 0 ? void 0 : chapter.split('chapter')[0]) === null || _c === void 0 ? void 0 : _c.replace('volume', '').trim());
             let language = (_d = $('.emoji').attr('data-lang')) !== null && _d !== void 0 ? _d : 'gb';
-            let time = source.convertTime($('i', $(obj)).text());
-            if (typeof chapterId === 'undefined')
-                continue;
+            let time = source.convertTime($('i.ps-3', $(obj)).text());
+            if ((typeof chapterId === 'undefined'))
+                return;
             chapters.push(createChapter({
                 id: chapterId,
                 mangaId: mangaId,
@@ -30747,22 +30749,11 @@ class Parser {
                 chapNum: Number(chapNum),
                 group: this.decodeHTMLEntity(chapGroup !== null && chapGroup !== void 0 ? chapGroup : ''),
                 langCode: (_e = Languages_1.reverseLangCode[language]) !== null && _e !== void 0 ? _e : Languages_1.reverseLangCode['_unknown'],
-                name: this.decodeHTMLEntity(chapName),
+                name: chapNamePart1 + " " + this.decodeHTMLEntity(chapNamePart2),
                 time: time
             }));
-        }
-        return chapters;
-    }
-    sortChapters(chapters) {
-        let sortedChapters = [];
-        chapters.forEach((c) => {
-            var _a;
-            if (((_a = sortedChapters[sortedChapters.indexOf(c)]) === null || _a === void 0 ? void 0 : _a.id) !== (c === null || c === void 0 ? void 0 : c.id)) {
-                sortedChapters.push(c);
-            }
         });
-        sortedChapters.sort((a, b) => (a.id > b.id) ? 1 : -1);
-        return sortedChapters;
+        return chapters;
     }
     parseChapterDetails($) {
         var _a, _b, _c, _d, _e;
