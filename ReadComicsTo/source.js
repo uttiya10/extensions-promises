@@ -514,7 +514,7 @@ const paperback_extensions_common_1 = require("paperback-extensions-common");
 const Parser_1 = require("./Parser");
 const READCOMICSTO_DOMAIN = 'https://readcomiconline.li';
 exports.ReadComicsToInfo = {
-    version: '1.0.5',
+    version: '1.0.6',
     name: 'ReadComicsOnlineLi',
     description: 'Extension that pulls western comics from readcomiconline.li',
     author: 'Aurora',
@@ -748,7 +748,7 @@ class ReadComicsTo extends paperback_extensions_common_1.Source {
     }
     getCloudflareBypassRequest() {
         return createRequestObject({
-            url: `${READCOMICSTO_DOMAIN}`,
+            url: `${READCOMICSTO_DOMAIN}/Comic/The-Walking-Dead/Issue-1?id=1715`,
             method: 'GET',
         });
     }
