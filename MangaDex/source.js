@@ -570,7 +570,7 @@ exports.MangaDexInfo = {
     description: 'Extension that pulls manga from MangaDex',
     icon: 'icon.png',
     name: 'MangaDex',
-    version: '1.0.4',
+    version: '1.0.5',
     authorWebsite: 'https://github.com/nar1n',
     websiteBaseURL: MANGADEX_DOMAIN,
     hentaiSource: false,
@@ -637,7 +637,12 @@ class MangaDex extends paperback_extensions_common_1.Source {
         });
     }
     getMangaShareUrl(mangaId) {
-        return `${MANGADEX_DOMAIN}/manga/${mangaId}`;
+        return `${MANGADEX_DOMAIN}/title/${mangaId}`;
+    }
+    globalRequestHeaders() {
+        return {
+            referer: MANGADEX_DOMAIN
+        };
     }
     getMangaUUIDs(numericIds, type = 'manga') {
         return __awaiter(this, void 0, void 0, function* () {
@@ -912,7 +917,7 @@ class MangaDex extends paperback_extensions_common_1.Source {
             let offset = (_a = metadata === null || metadata === void 0 ? void 0 : metadata.offset) !== null && _a !== void 0 ? _a : 0;
             let results = [];
             const request = createRequestObject({
-                url: `${MANGADEX_API}/manga?title=${encodeURIComponent((_b = query.title) !== null && _b !== void 0 ? _b : '')}&limit=100&offset=${offset}`,
+                url: `${MANGADEX_API}/manga?title=${encodeURIComponent((_b = query.title) !== null && _b !== void 0 ? _b : '')}&limit=100&offset=${offset}&contentRating[0]=none&contentRating[1]=safe&contentRating[2]=suggestive&contentRating[3]=erotica&contentRating[4]=pornographic`,
                 method: 'GET',
             });
             const response = yield this.requestManager.schedule(request, 1);
@@ -951,7 +956,7 @@ class MangaDex extends paperback_extensions_common_1.Source {
             const sections = [
                 {
                     request: createRequestObject({
-                        url: `${MANGADEX_API}/manga?limit=20`,
+                        url: `${MANGADEX_API}/manga?limit=20&contentRating[0]=none&contentRating[1]=safe&contentRating[2]=suggestive&contentRating[3]=erotica&contentRating[4]=pornographic`,
                         method: 'GET',
                     }),
                     section: createHomeSection({
@@ -962,7 +967,7 @@ class MangaDex extends paperback_extensions_common_1.Source {
                 },
                 {
                     request: createRequestObject({
-                        url: `${MANGADEX_API}/manga?limit=20&publicationDemographic[0]=shounen`,
+                        url: `${MANGADEX_API}/manga?limit=20&publicationDemographic[0]=shounen&contentRating[0]=none&contentRating[1]=safe&contentRating[2]=suggestive&contentRating[3]=erotica&contentRating[4]=pornographic`,
                         method: 'GET',
                     }),
                     section: createHomeSection({
@@ -973,7 +978,7 @@ class MangaDex extends paperback_extensions_common_1.Source {
                 },
                 {
                     request: createRequestObject({
-                        url: `${MANGADEX_API}/manga?limit=20&includedTags[0]=391b0423-d847-456f-aff0-8b0cfc03066b`,
+                        url: `${MANGADEX_API}/manga?limit=20&includedTags[0]=391b0423-d847-456f-aff0-8b0cfc03066b&contentRating[0]=none&contentRating[1]=safe&contentRating[2]=suggestive&contentRating[3]=erotica&contentRating[4]=pornographic`,
                         method: 'GET',
                     }),
                     section: createHomeSection({
@@ -1027,15 +1032,15 @@ class MangaDex extends paperback_extensions_common_1.Source {
             let url = '';
             switch (homepageSectionId) {
                 case 'recently_updated': {
-                    url = `${MANGADEX_API}/manga?limit=100&offset=${offset}`;
+                    url = `${MANGADEX_API}/manga?limit=100&offset=${offset}&contentRating[0]=none&contentRating[1]=safe&contentRating[2]=suggestive&contentRating[3]=erotica&contentRating[4]=pornographic`;
                     break;
                 }
                 case 'shounen': {
-                    url = `${MANGADEX_API}/manga?limit=100&publicationDemographic[0]=shounen&offset=${offset}`;
+                    url = `${MANGADEX_API}/manga?limit=100&publicationDemographic[0]=shounen&offset=${offset}&contentRating[0]=none&contentRating[1]=safe&contentRating[2]=suggestive&contentRating[3]=erotica&contentRating[4]=pornographic`;
                     break;
                 }
                 case 'action': {
-                    url = `${MANGADEX_API}/manga?limit=100&includedTags[0]=391b0423-d847-456f-aff0-8b0cfc03066b&offset=${offset}`;
+                    url = `${MANGADEX_API}/manga?limit=100&includedTags[0]=391b0423-d847-456f-aff0-8b0cfc03066b&offset=${offset}&contentRating[0]=none&contentRating[1]=safe&contentRating[2]=suggestive&contentRating[3]=erotica&contentRating[4]=pornographic`;
                     break;
                 }
             }
