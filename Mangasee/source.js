@@ -747,7 +747,7 @@ class Mangasee extends paperback_extensions_common_1.Source {
     }
     globalRequestHeaders() {
         return {
-            referer: exports.MS_DOMAIN
+            referer: exports.MS_DOMAIN + '/'
         };
     }
     getCloudflareBypassRequest() {
