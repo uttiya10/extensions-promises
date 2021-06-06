@@ -342,7 +342,7 @@ exports.ML_DOMAIN = 'https://manga4life.com';
 const headers = { "content-type": "application/x-www-form-urlencoded" };
 const method = 'GET';
 exports.MangaLifeInfo = {
-    version: '2.1.8',
+    version: '2.1.9',
     name: 'Manga4Life',
     icon: 'icon.png',
     author: 'Daniel Kovalevich',
