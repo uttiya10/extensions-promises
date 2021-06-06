@@ -138,7 +138,7 @@ export class Mangasee extends Source {
 
   globalRequestHeaders(): RequestHeaders {
     return {
-      referer: MS_DOMAIN
+      referer: MS_DOMAIN + '/'
     }
   }
 
