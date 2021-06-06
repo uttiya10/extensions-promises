@@ -459,7 +459,7 @@ class MangaLife extends paperback_extensions_common_1.Source {
     }
     globalRequestHeaders() {
         return {
-            referer: exports.ML_DOMAIN
+            referer: exports.ML_DOMAIN + '/'
         };
     }
     getCloudflareBypassRequest() {
