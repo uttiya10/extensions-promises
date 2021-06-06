@@ -138,7 +138,7 @@ export class MangaLife extends Source {
 
   globalRequestHeaders(): RequestHeaders {
     return {
-      referer: ML_DOMAIN
+      referer: ML_DOMAIN + '/'
     }
   }
 
